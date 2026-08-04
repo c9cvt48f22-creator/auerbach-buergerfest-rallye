@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#14213d" />
+  <title>Escape Auerbach – Test-Rallye</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#18233b;
+      --text:#f8fafc;
+      --muted:#cbd5e1;
+      --accent:#f2b134;
+      --good:#168c4a;
+      --bad:#b91c1c;
+      --info:#1d4ed8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(160deg,#0f172a,#172554);
+      color:var(--text);
+    }
+    main{max-width:760px;margin:auto;padding:22px}
+    .card{
+      background:rgba(24,35,59,.96);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:20px;
+      padding:24px;
+      box-shadow:0 18px 45px rgba(0,0,0,.25);
+      margin:16px 0;
+    }
+    h1,h2,h3{line-height:1.15}
+    h1{font-size:clamp(2rem,7vw,3.5rem);margin:.2em 0}
+    h2{font-size:1.55rem}
+    p,li,label,input,button,textarea{font-size:1.05rem}
+    .eyebrow{color:var(--accent);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .muted{color:var(--muted)}
+    .grid{display:grid;gap:14px}
+    .two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    input,textarea,select{
+      width:100%;padding:14px;border-radius:12px;border:1px solid #64748b;
+      background:#0f172a;color:white;margin-top:7px
+    }
+    textarea{min-height:100px;resize:vertical}
+    button,.button{
+      display:inline-block;width:100%;padding:15px 18px;border:0;border-radius:13px;
+      font-weight:800;cursor:pointer;text-decoration:none;text-align:center;
+      background:var(--accent);color:#171717;margin-top:10px
+    }
+    button.secondary,.button.secondary{background:#334155;color:white}
+    button.danger{background:var(--bad);color:white}
+    .status{padding:17px;border-radius:14px;font-weight:800;text-align:center;margin:14px 0}
+    .good{background:var(--good)}
+    .bad{background:var(--bad)}
+    .info{background:var(--info)}
+    .timer{font-size:2rem;font-variant-numeric:tabular-nums;font-weight:900}
+    .score{font-size:1.35rem;font-weight:900}
+    .pill{display:inline-block;padding:7px 11px;border-radius:999px;background:#334155;margin:4px}
+    .progress{height:12px;background:#334155;border-radius:999px;overflow:hidden}
+    .progress>div{height:100%;background:var(--accent)}
+    .hidden{display:none!important}
+    .flash{
+      position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+      padding:28px;text-align:center;color:white;font-size:clamp(2rem,10vw,5rem);font-weight:1000
+    }
+    .flash.good{background:var(--good)}
+    .flash.bad{background:var(--bad)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #475569;text-align:left;vertical-align:top}
+    .small{font-size:.9rem}
+    .emoji-scale button{width:auto;min-width:56px;margin:5px}
+    .footer{text-align:center;color:var(--muted);font-size:.9rem;padding:18px}
+  </style>
+</head>
+<body>
+<main id="app"></main>
+<div class="footer">Testversion 0.1 · Bürgerfest-Rallye Auerbach i. d. OPf.</div>
+
+<script>
+const BASE_URL = "https://auerbach-buergerfest.github.io/auerbach-buergerfest-rallye/";
+const STORAGE_KEY = "auerbach_rallye_state_v01";
+const RESULTS_KEY = "auerbach_rallye_results_v01";
+
+const stations = {
+  1: {
+    title:"Das Zeichen Auerbachs",
+    locationHint:"Sucht einen Ort, an dem das Wappen oder das Zeichen Auerbachs gut sichtbar ist.",
+    story:"Die erste Spur zeigt: Eine Stadt braucht ein gemeinsames Zeichen, an dem Menschen erkennen, wozu sie gehören.",
+    task:`Ordnet die Buchstaben zu einem Tier, das eng mit Auerbach verbunden ist:<br><br>
+          <strong>R – U – O – C – H – A – E – S</strong>`,
+    answers:["auerochse"],
+    hint:"Das Tier beginnt mit „Auer…“.",
+    maxPoints:100
+  },
+  2: {
+    title:"Der Gruß aus der Tiefe",
+    locationHint:"Sucht einen Platz mit Bezug zum Bergbau oder zur Geschichte der Bergleute.",
+    story:"Die zweite Spur erinnert daran: Große Aufgaben wurden unter Tage nie allein gelöst. Vertrauen und Zusammenhalt waren lebenswichtig.",
+    task:`Entschlüsselt den Morsecode. Leerzeichen trennen Buchstaben, ein Schrägstrich trennt Wörter:<br><br>
+          <strong>--. .-.. ..-- -.-. -.- / .- ..- ..-.</strong><br><br>
+          Gebt die zwei Wörter ein.`,
+    answers:["glück auf","glueck auf"],
+    hint:"Es ist der traditionelle Gruß der Bergleute.",
+    maxPoints:120
+  },
+  3: {
+    title:"Das unsichtbare Team",
+    locationHint:"Sucht einen ruhigeren Ort in Richtung Kirchplatz. Dort braucht ihr Konzentration.",
+    story:"Die dritte Spur zeigt: Ein Bürgerfest entsteht nur, weil viele Gruppen ihren Teil beitragen.",
+    task:`Löst das Mini-Kreuzworträtsel gedanklich. Die Anfangsbuchstaben der Lösungen ergeben das Lösungswort.<br><br>
+      1. Menschen, die ohne Bezahlung mithelfen.<br>
+      2. Zusammenschlüsse, die Stände und Aktionen anbieten.<br>
+      3. Menschen, die das Fest besuchen.<br>
+      4. Personen, die planen und koordinieren.<br><br>
+      Gesucht ist das Wort aus den Anfangsbuchstaben.`,
+    answers:["hvoo"],
+    hint:"Die vier Lösungen können sein: Helfer, Vereine, Besucher, Organisatoren.",
+    maxPoints:150
+  }
+};
+
+const routes = [
+  [1,2,3],
+  [2,3,1],
+  [3,1,2]
+];
+
+function loadState(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))}catch(e){return null}
+}
+function saveState(s){localStorage.setItem(STORAGE_KEY, JSON.stringify(s))}
+function clearState(){localStorage.removeItem(STORAGE_KEY)}
+function getResults(){
+  try{return JSON.parse(localStorage.getItem(RESULTS_KEY)) || []}catch(e){return []}
+}
+function saveResults(r){localStorage.setItem(RESULTS_KEY, JSON.stringify(r))}
+function normalize(v){
+  return (v||"").toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/ß/g,"ss").replace(/\s+/g," ");
+}
+function fmt(ms){
+  const s=Math.max(0,Math.floor(ms/1000));
+  const h=String(Math.floor(s/3600)).padStart(2,"0");
+  const m=String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const sec=String(s%60).padStart(2,"0");
+  return `${h}:${m}:${sec}`;
+}
+function flash(type,text,after){
+  const el=document.createElement("div");
+  el.className=`flash ${type}`;
+  el.innerHTML=text;
+  document.body.appendChild(el);
+  if(navigator.vibrate) navigator.vibrate(type==="bad"?[180,80,180]:120);
+  setTimeout(()=>{el.remove(); if(after) after()},1500);
+}
+function currentStation(s){return s.route[s.routeIndex]}
+function queryStation(){
+  return new URLSearchParams(location.search).get("station");
+}
+function stripQuery(){
+  history.replaceState({}, "", location.pathname);
+}
+function startApp(){
+  const params=new URLSearchParams(location.search);
+  if(params.get("admin")==="1"){renderAdmin();return}
+  const s=loadState();
+  if(!s){renderStart();return}
+  if(s.finished){renderFinish(s);return}
+  const scanned=queryStation();
+  if(scanned){handleScan(s,Number(scanned));return}
+  renderMission(s);
+}
+function renderStart(){
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Test-Rallye · Auerbach i. d. OPf.</div>
+      <h1>Das Geheimnis des Bürgerfests</h1>
+      <p>Eine verschlüsselte Botschaft führt euch zu drei Teststationen. Jede gelöste Aufgabe zeigt, warum ein Bürgerfest nur durch gemeinsames Handeln möglich wird.</p>
+      <div class="status info">Diese Version ist zum Testen gedacht. Sie speichert Daten nur auf diesem Gerät.</div>
+    </section>
+    <section class="card">
+      <h2>Team anmelden</h2>
+      <div class="grid">
+        <label>Teamname
+          <input id="team" maxlength="40" placeholder="z. B. Die Codeknacker">
+        </label>
+        <label>Vornamen der Teammitglieder
+          <textarea id="members" placeholder="z. B. Mia, Leon, Samir, Emma"></textarea>
+        </label>
+        <label><input id="adult" type="checkbox" style="width:auto"> Eine erwachsene Begleitperson weiß, dass wir teilnehmen.</label>
+        <label>Fotoveröffentlichung
+          <select id="consent">
+            <option value="no">Nein – Fotos nur für die Testauswertung speichern</option>
+            <option value="yes">Ja – Veröffentlichung wurde erlaubt</option>
+          </select>
+        </label>
+        <button onclick="beginGame()">Mission starten</button>
+      </div>
+    </section>`;
+}
+function beginGame(){
+  const team=document.getElementById("team").value.trim();
+  const members=document.getElementById("members").value.trim();
+  const adult=document.getElementById("adult").checked;
+  if(!team || !members){alert("Bitte Teamname und Vornamen eintragen.");return}
+  if(!adult){alert("Bitte bestätigt, dass eine erwachsene Begleitperson von der Teilnahme weiß.");return}
+  const route=routes[Math.floor(Math.random()*routes.length)];
+  const s={
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),
+    team,members,consent:document.getElementById("consent").value,
+    startedAt:Date.now(), route, routeIndex:0, score:0,
+    attempts:{}, hints:{}, solved:[], photos:[], finished:false
+  };
+  saveState(s); renderMission(s);
+}
+function renderMission(s){
+  const st=stations[currentStation(s)];
+  const pct=Math.round((s.solved.length/3)*100);
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Team ${escapeHtml(s.team)}</div>
+      <div class="grid two">
+        <div><div class="muted">Zeit</div><div class="timer" id="timer">${fmt(Date.now()-s.startedAt)}</div></div>
+        <div><div class="muted">Punkte</div><div class="score">${s.score}</div></div>
+      </div>
+      <div class="progress"><div style="width:${pct}%"></div></div>
+      <p class="muted">${s.solved.length} von 3 Teststationen gelöst</p>
+    </section>
+    <section class="card">
+      <div class="eyebrow">Nächste Spur</div>
+      <h2>${st.title}</h2>
+      <p>${st.locationHint}</p>
+      <p class="muted">Sucht dort den QR-Code und scannt ihn mit der normalen Handykamera.</p>
+      <a class="button secondary" href="${BASE_URL}?station=${currentStation(s)}">Testweise richtigen QR-Code öffnen</a>
+      <a class="button secondary" href="${BASE_URL}?station=${currentStation(s)===1?2:1}">Testweise falschen QR-Code öffnen</a>
+    </section>
+    <section class="card">
+      <h3>Testwerkzeuge</h3>
+      <button class="secondary" onclick="if(confirm('Test wirklich zurücksetzen?')){clearState();location.href=location.pathname}">Test zurücksetzen</button>
+      <a class="button secondary" href="${BASE_URL}?admin=1">Auswertung auf diesem Gerät</a>
+    </section>`;
+  setInterval(()=>{const t=document.getElementById("timer");if(t)t.textContent=fmt(Date.now()-s.startedAt)},1000);
+}
+function handleScan(s, stationNo){
+  const expected=currentStation(s);
+  if(stationNo!==expected){
+    stripQuery();
+    flash("bad","FALSCHER QR-CODE<br><span style='font-size:.35em'>Diese Station gehört noch nicht zu eurer Route.</span>",()=>renderMission(s));
+    return;
+  }
+  stripQuery();
+  flash("good","STATION GEFUNDEN",()=>renderPuzzle(s,stationNo));
+}
+function renderPuzzle(s,n){
+  const st=stations[n];
+  const a=s.attempts[n]||0;
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Station ${s.routeIndex+1} von 3</div>
+      <h1>${st.title}</h1>
+      <p>${st.task}</p>
+      <label>Eure Lösung
+        <input id="answer" autocomplete="off" placeholder="Antwort eingeben">
+      </label>
+      <button onclick="checkAnswer(${n})">Antwort prüfen</button>
+      <button class="secondary" onclick="useHint(${n})">Hinweis nutzen (−15 Punkte)</button>
+      <p class="muted">Bisherige Fehlversuche: ${a}</p>
+    </section>`;
+}
+function useHint(n){
+  const s=loadState(); const st=stations[n];
+  if(!s.hints[n]){s.hints[n]=1;s.score=Math.max(0,s.score-15);saveState(s)}
+  alert(st.hint); renderPuzzle(s,n);
+}
+function checkAnswer(n){
+  const s=loadState(), st=stations[n];
+  const val=normalize(document.getElementById("answer").value);
+  const ok=st.answers.some(x=>normalize(x)===val);
+  s.attempts[n]=(s.attempts[n]||0)+1;
+  if(!ok){saveState(s);flash("bad","NOCH NICHT RICHTIG",()=>renderPuzzle(s,n));return}
+  const tries=s.attempts[n];
+  const earned=Math.max(40,st.maxPoints-(tries-1)*20);
+  s.score+=earned;
+  s.solved.push(n);
+  saveState(s);
+  flash("good",`RICHTIG<br><span style="font-size:.38em">+${earned} Punkte</span>`,()=>renderInsight(s,n));
+}
+function renderInsight(s,n){
+  const st=stations[n];
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Aha-Erkenntnis</div>
+      <h1>Neue Spur entschlüsselt</h1>
+      <p>${st.story}</p>
+      <div class="status info">Ein Bürgerfest entsteht aus vielen verschiedenen Beiträgen – keiner davon reicht allein.</div>
+      <button onclick="bonusPhoto(${n})">Optionales Bonusfoto aufnehmen (+20 Punkte)</button>
+      <button class="secondary" onclick="nextStation(${n})">Ohne Foto weiter</button>
+    </section>`;
+}
+function bonusPhoto(n){
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <h2>Bonusaufgabe</h2>
+      <p>Macht ein Teamfoto, das „Zusammenhalt“ zeigt. In der Testversion wird das Bild nur auf diesem Gerät gespeichert.</p>
+      <input id="photo" type="file" accept="image/*" capture="environment">
+      <button onclick="savePhoto(${n})">Foto speichern und +20 Punkte erhalten</button>
+      <button class="secondary" onclick="nextStation(${n})">Überspringen</button>
+    </section>`;
+}
+function savePhoto(n){
+  const file=document.getElementById("photo").files[0];
+  if(!file){alert("Bitte zuerst ein Foto auswählen oder aufnehmen.");return}
+  if(file.size>1500000){alert("Bitte ein kleineres Foto verwenden. Die Testversion speichert lokal.");return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const s=loadState();
+    s.photos.push({station:n,data:reader.result});
+    s.score+=20; saveState(s); nextStation(n);
+  };
+  reader.readAsDataURL(file);
+}
+function nextStation(n){
+  const s=loadState();
+  s.routeIndex++;
+  if(s.routeIndex>=s.route.length){
+    s.finished=true;s.finishedAt=Date.now();saveState(s);storeResult(s);renderFinish(s);
+  }else{saveState(s);renderMission(s)}
+}
+function storeResult(s){
+  const r=getResults();
+  const idx=r.findIndex(x=>x.id===s.id);
+  const entry={...s,duration:s.finishedAt-s.startedAt};
+  if(idx>=0)r[idx]=entry;else r.push(entry);
+  saveResults(r);
+}
+function renderFinish(s){
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Mission abgeschlossen</div>
+      <h1>Ihr habt das Geheimnis gelöst!</h1>
+      <p>Kein Verein, kein Gewerbebetrieb, kein Helfer, kein Organisator und kein Besucher könnte allein ein Bürgerfest schaffen. Erst alle zusammen machen daraus etwas Großes.</p>
+      <div class="grid two">
+        <div class="status info"><strong>${s.score}</strong><br>Punkte</div>
+        <div class="status info"><strong>${fmt(s.finishedAt-s.startedAt)}</strong><br>Zeit</div>
+      </div>
+      <div class="status good">Die Sieger werden am Sonntag um 15:00 Uhr bekanntgegeben.</div>
+    </section>
+    <section class="card">
+      <h2>Kurzes Feedback</h2>
+      <label>Wie hat es euch gefallen?
+        <select id="rating">
+          <option value="5">😍 Sehr gut</option>
+          <option value="4">🙂 Gut</option>
+          <option value="3">😐 Okay</option>
+          <option value="2">🙁 Eher nicht</option>
+          <option value="1">😞 Gar nicht</option>
+        </select>
+      </label>
+      <label>Was war besonders gut oder was sollen wir verbessern?
+        <textarea id="feedback" placeholder="Ein kurzer Satz reicht."></textarea>
+      </label>
+      <button onclick="saveFeedback()">Feedback speichern</button>
+      <a class="button secondary" href="${BASE_URL}?admin=1">Test-Auswertung öffnen</a>
+    </section>`;
+}
+function saveFeedback(){
+  const s=loadState();
+  s.rating=document.getElementById("rating").value;
+  s.feedback=document.getElementById("feedback").value.trim();
+  saveState(s);storeResult(s);
+  alert("Danke für euer Feedback!");
+}
+function renderAdmin(){
+  const results=getResults().sort((a,b)=>(b.score-a.score)||((a.duration||0)-(b.duration||0)));
+  const rows=results.map((r,i)=>`
+    <tr><td>${i+1}</td><td>${escapeHtml(r.team)}</td><td>${escapeHtml(r.members)}</td>
+    <td>${r.score}</td><td>${fmt(r.duration||0)}</td><td>${r.rating||"–"}</td>
+    <td>${escapeHtml(r.feedback||"")}</td><td>${r.consent==="yes"?"Ja":"Nein"}</td></tr>`).join("");
+  const photos=results.flatMap(r=>(r.photos||[]).map(p=>`
+    <div class="card"><strong>${escapeHtml(r.team)}</strong><br>
+    <span class="small">Station ${p.station} · Veröffentlichung: ${r.consent==="yes"?"erlaubt":"nicht erlaubt"}</span><br>
+    <img src="${p.data}" alt="Bonusfoto" style="width:100%;border-radius:12px;margin-top:10px"></div>`)).join("");
+  document.getElementById("app").innerHTML=`
+    <section class="card">
+      <div class="eyebrow">Nur Testgerät</div>
+      <h1>Auswertung</h1>
+      <p class="muted">Diese Version zeigt ausschließlich Ergebnisse, die auf diesem Gerät gespeichert wurden. Für die echte Veranstaltung verbinden wir die Seite mit Supabase.</p>
+      <div style="overflow:auto">
+      <table><thead><tr><th>#</th><th>Team</th><th>Namen</th><th>Punkte</th><th>Zeit</th><th>Bewertung</th><th>Feedback</th><th>Fotos erlaubt</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="8">Noch keine Ergebnisse.</td></tr>'}</tbody></table>
+      </div>
+      <button onclick="exportResults()">Ergebnisse als JSON herunterladen</button>
+      <button class="danger" onclick="if(confirm('Alle Testergebnisse löschen?')){localStorage.removeItem(RESULTS_KEY);renderAdmin()}">Testergebnisse löschen</button>
+      <a class="button secondary" href="${BASE_URL}">Zur Rallye</a>
+    </section>
+    <section><h2>Gespeicherte Bonusfotos</h2>${photos||'<div class="card">Noch keine Fotos vorhanden.</div>'}</section>`;
+}
+function exportResults(){
+  const blob=new Blob([JSON.stringify(getResults(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="auerbach-test-ergebnisse.json";a.click();
+  URL.revokeObjectURL(a.href);
+}
+function escapeHtml(v){
+  return String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+startApp();
+</script>
+</body>
+</html>
