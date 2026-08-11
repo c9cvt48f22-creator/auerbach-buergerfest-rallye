@@ -1,479 +1,354 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
-<meta
-  name="theme-color"
-  content="#8b6a35"
->
-
-<title>
-  Stadtrallye Bürgerfest
-</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stadtrallye Auerbach</title>
 
 <style>
-
-/* ==========================================================
-   GRUNDLAGE
-   ========================================================== */
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+  * {
+  box-sizing: border-box;
 }
 
-html,
-body{
-  margin:0;
-  padding:0;
-  min-height:100%;
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: #f4efe6;
+  color: #29251f;
 }
 
-body{
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-
-  background:
-    #f4f0e8;
-
-  color:
-    #302b25;
-
-  overflow-x:hidden;
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-
-/* ==========================================================
-   APP
-   ========================================================== */
-
-#app{
-  width:100%;
-  min-height:100vh;
-
-  padding:
-    18px
-    16px
-    95px;
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 18px;
+  margin: 5px;
+  cursor: pointer;
+  background: #29251f;
+  color: white;
 }
 
-
-.page{
-  width:100%;
-  max-width:700px;
-  margin:0 auto;
+button.secondary {
+  background: #d8d0c3;
+  color: #29251f;
 }
 
-
-/* ==========================================================
-   KARTEN
-   ========================================================== */
-
-.card{
-  background:#fffdf8;
-
-  border:
-    1px solid
-    rgba(90,70,40,.14);
-
-  border-radius:22px;
-
-  padding:22px;
-
-  margin-bottom:16px;
-
-  box-shadow:
-    0 7px 25px
-    rgba(50,40,25,.08);
+button.hint {
+  background: transparent;
+  color: #29251f;
+  border: 1px solid #aaa;
 }
 
-
-/* ==========================================================
-   STARTSEITE
-   ========================================================== */
-
-.hero{
-  min-height:
-    calc(100vh - 110px);
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-
-  text-align:center;
-
-  padding:
-    20px
-    0;
+#app {
+  min-height: 100vh;
 }
 
-
-.logoMark{
-  width:92px;
-  height:92px;
-
-  margin:
-    0 auto
-    22px;
-
-  border-radius:50%;
-
-  background:#8b6a35;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  color:white;
-
-  font-size:42px;
-
-  box-shadow:
-    0 8px 24px
-    rgba(80,55,20,.18);
+.page {
+  max-width: 760px;
+  margin: auto;
+  padding: 24px 18px 100px;
 }
 
-
-.eyebrow{
-  font-size:12px;
-
-  letter-spacing:
-    .14em;
-
-  text-transform:
-    uppercase;
-
-  font-weight:700;
-
-  color:#8b6a35;
-
-  margin-bottom:9px;
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-
-h1{
-  font-size:
-    clamp(30px,8vw,48px);
-
-  line-height:1.04;
-
-  margin:
-    0 0 18px;
-
-  color:#302b25;
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: .6;
 }
 
+h1 {
+  font-size: clamp(32px, 9vw, 58px);
+  line-height: 1.05;
+  margin: 12px 0 20px;
+}
 
-h2{
-  font-size:26px;
+h2 {
+  margin-top: 28px;
+}
 
-  line-height:1
-  const APP = document.getElementById("app");
+p {
+  line-height: 1.6;
+}
 
-const STATE_KEY = "auerbach_rallye_state";
-const RESULTS_KEY = "auerbach_rallye_results";
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 22px;
+  margin-top: 20px;
+  box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
 
-const HINT_COST = 20;
-const LOCATION_COST = 10;
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: white;
+}
 
-const STATIONS = {
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 15px;
+}
 
-  wappen: {
-    title: "Das zerbrochene Stadtwappen",
-    points: 100
-  },
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(244,239,230,.95);
+  backdrop-filter: blur(8px);
+}
 
-  bergleute: {
-    title: "Das Geheimnis der Bergleute",
-    points: 120
-  },
+.bottom-tools {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 20;
+}
 
-  jahreszahlen: {
-    title: "Die Zeitsprünge Auerbachs",
-    points: 120
-  },
+.tool {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+}
 
-  loewe: {
-    title: "Die Bestellung im Goldenen Löwen",
-    points: 150
-  },
+.info {
+  padding: 15px;
+  background: #eee8dc;
+  border-radius: 12px;
+  margin: 18px 0;
+}
 
-  stromer: {
-    title: "Das Geheimnis des Doktor Stromer",
-    points: 120
-  },
+.warning {
+  padding: 15px;
+  background: #f3dfbd;
+  border-radius: 12px;
+}
 
-  auerochse: {
-    title: "Das Gedächtnis des Goldenen Urs",
-    points: 130
-  },
+.grid {
+  display: grid;
+  gap: 10px;
+}
 
-  buecherei: {
-    title: "Der versteckte Buchstabensalat",
-    points: 100
-  },
+.grid.two {
+  grid-template-columns: repeat(2, 1fr);
+}
 
-  kirche: {
-    title: "Das Geheimnis im Erz",
-    points: 130
-  },
+.station-button {
+  min-height: 100px;
+  background: white;
+  color: #29251f;
+  border: 1px solid #ddd;
+  text-align: left;
+}
 
-  brunnen: {
-    title: "Der geheime Markttag",
-    points: 140
-  },
+.choice.selected {
+  outline: 3px solid #29251f;
+}
 
-  finale: {
-    title: "Die Nachricht aus der Vergangenheit",
-    points: 250
+.story-card {
+  padding: 16px;
+  margin: 8px 0;
+  background: #f4efe6;
+  border-radius: 12px;
+}
+
+.memory {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.memory-card {
+  min-height: 90px;
+  padding: 8px;
+  font-size: 13px;
+}
+
+.memory-card.open,
+.memory-card.matched {
+  background: white;
+  color: #29251f;
+  outline: 3px solid #29251f;
+}
+
+.puzzle {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.puzzle-piece {
+  aspect-ratio: 1;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.big {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.center {
+  text-align: center;
+}
+
+.muted {
+  opacity: .65;
+}
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 18px 14px 100px;
   }
 
+  .memory {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid.two {
+    grid-template-columns: 1fr;
+  }
+
+}
+ </style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+
+const app = document.getElementById("app");
+
+const stations = [
+  {
+    id: "wappen",
+    title: "Das zerbrochene Stadtwappen"
+  },
+  {
+    id: "bergleute",
+    title: "Das Geheimnis der Bergleute"
+  },
+  {
+    id: "jahreszahlen",
+    title: "Die Zeitsprünge Auerbachs"
+  },
+  {
+    id: "loewe",
+    title: "Die Bestellung im Goldenen Löwen"
+  },
+  {
+    id: "stromer",
+    title: "Das Geheimnis des Doktor Stromer"
+  },
+  {
+    id: "auerochse",
+    title: "Das Gedächtnis des Goldenen Urs"
+  },
+  {
+    id: "buecherei",
+    title: "Der versteckte Buchstabensalat"
+  },
+  {
+    id: "kirche",
+    title: "Das Geheimnis im Erz"
+  },
+  {
+    id: "brunnen",
+    title: "Der geheime Markttag"
+  }
+];
+
+let game = {
+  team: "",
+  players: "",
+  score: 0,
+  route: [],
+  current: 0,
+  solved: [],
+  skipped: [],
+  hints: {},
+  locationHints: {},
+  notes: ""
 };
 
 
-/* ---------- Speicher ---------- */
-
-function loadState() {
-
-  const data =
-    localStorage.getItem(STATE_KEY);
-
-  return data
-    ? JSON.parse(data)
-    : null;
-}
-
-
-function saveState(state) {
-
+function save() {
   localStorage.setItem(
-    STATE_KEY,
-    JSON.stringify(state)
+    "auerbachRallye",
+    JSON.stringify(game)
   );
-
 }
 
 
-function loadResults() {
+function load() {
 
-  const data =
-    localStorage.getItem(RESULTS_KEY);
+  const saved =
+    localStorage.getItem("auerbachRallye");
 
-  return data
-    ? JSON.parse(data)
-    : [];
-
-}
-
-
-function saveResults(results) {
-
-  localStorage.setItem(
-    RESULTS_KEY,
-    JSON.stringify(results)
-  );
-
-}
-
-
-/* ---------- Hilfsfunktionen ---------- */
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-
-function esc(text) {
-
-  return String(text || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+  if (saved) {
+    game = JSON.parse(saved);
+  }
 
 }
 
 
 function shuffle(array) {
 
-  return [...array]
-    .sort(() => Math.random() - 0.5);
-
-}
-
-
-function show(text) {
-
-  APP.innerHTML = text;
-
-}
-
-
-/* ---------- Spiel erstellen ---------- */
-
-function createGame(team, players) {
-
-  const ids =
-    Object.keys(STATIONS)
-      .filter(id => id !== "finale");
-
-  const route =
-    shuffle(ids);
-
-  route.push("finale");
-
-  const state = {
-
-    team,
-    players,
-
-    route,
-
-    position: 0,
-
-    score: 0,
-
-    solved: [],
-
-    skipped: [],
-
-    hints: {},
-
-    locationHints: {},
-
-    notes: "",
-
-    startTime: Date.now(),
-
-    finished: false
-
-  };
-
-  saveState(state);
-
-  return state;
-
-}
-
-
-/* ---------- aktuelles Rätsel ---------- */
-
-function currentStation(state) {
-
-  return state.route[
-    state.position
-  ];
-
-}
-
-
-/* ---------- Punktabzug ---------- */
-
-function useHint(state, station) {
-
-  if (!state.hints[station]) {
-
-    state.hints[station] = 0;
-
-  }
-
-  state.hints[station]++;
-
-  state.score =
-    Math.max(
-      0,
-      state.score - HINT_COST
-    );
-
-  saveState(state);
-
-}
-
-
-function useLocationHint(state, station) {
-
-  if (state.locationHints[station]) {
-    return;
-  }
-
-  state.locationHints[station] = true;
-
-  state.score =
-    Math.max(
-      0,
-      state.score - LOCATION_COST
-    );
-
-  saveState(state);
-
-}
-
-
-/* ---------- Zeit ---------- */
-
-function elapsed(state) {
-
-  return Date.now()
-    - state.startTime;
-
-}
-
-
-function formatTime(ms) {
-
-  const total =
-    Math.floor(ms / 1000);
-
-  const min =
-    Math.floor(total / 60);
-
-  const sec =
-    total % 60;
-
-  return (
-
-    String(min).padStart(2,"0")
-    + ":"
-    + String(sec).padStart(2,"0")
-
+  return [...array].sort(
+    () => Math.random() - 0.5
   );
 
 }
-  function landing() {
 
-  show(`
-    <div class="hero">
+
+function startPage() {
+
+  app.innerHTML = `
+
+    <main class="page hero">
 
       <div class="eyebrow">
-        STADTRALLYE BÜRGERFEST
+        Stadtrallye Bürgerfest
       </div>
 
       <h1>
         Die Nachricht aus der Vergangenheit
       </h1>
 
-      <p class="lead">
+      <p>
         Vor langer Zeit wurde eine geheimnisvolle
         Nachricht in zwölf Teile zerlegt.
         Ihre Spuren führen mitten durch Auerbach.
-      </p>
-
-      <p>
-        Findet die Hinweise, löst die Rätsel
-        und setzt am Ende die Nachricht wieder zusammen.
       </p>
 
       <div class="card">
@@ -481,18 +356,16 @@ function formatTime(ms) {
         <label>
           Teamname
           <input
-            id="teamName"
-            type="text"
-            maxlength="30"
-            placeholder="z. B. Die Stadtfüchse">
+            id="team"
+            placeholder="Euer Teamname">
         </label>
 
         <label>
-          Namen der Teammitglieder
+          Teammitglieder
           <textarea
             id="players"
             rows="3"
-            placeholder="Vorname, Vorname, Vorname ..."></textarea>
+            placeholder="Namen der Teammitglieder"></textarea>
         </label>
 
         <button onclick="startGame()">
@@ -501,113 +374,101 @@ function formatTime(ms) {
 
       </div>
 
-      <p class="small muted">
-        Ihr könnt die Rätsel gemeinsam lösen.
-        Achtet auf Hinweise und denkt gut nach.
-      </p>
-
-    </div>
-  `);
-
+    </main>
+  `;
 }
 
 
 function startGame() {
 
   const team =
-    $("teamName").value.trim();
+    document.getElementById("team")
+      .value.trim();
 
   const players =
-    $("players").value.trim();
+    document.getElementById("players")
+      .value.trim();
 
-  if (!team) {
+  if (!team || !players) {
 
-    alert("Bitte gebt zuerst einen Teamnamen ein.");
-
-    return;
-
-  }
-
-  if (!players) {
-
-    alert("Bitte gebt die Teammitglieder ein.");
-
-    return;
-
-  }
-
-  const state =
-    createGame(
-      team,
-      players
+    alert(
+      "Bitte Teamname und Teammitglieder eingeben."
     );
 
-  mission(state);
+    return;
+  }
+
+  game = {
+    team,
+    players,
+    score: 0,
+    route: shuffle(
+      stations.map(s => s.id)
+    ),
+    current: 0,
+    solved: [],
+    skipped: [],
+    hints: {},
+    locationHints: {},
+    notes: ""
+  };
+
+  save();
+
+  showStation();
 
 }
 
 
-/* ---------- Spieloberfläche ---------- */
+function currentStation() {
 
-function mission(state) {
-
-  const station =
-    currentStation(state);
-
-  if (!station) {
-
-    finish(state);
-
-    return;
-
-  }
-
-  if (station === "finale") {
-
-    finale(state);
-
-    return;
-
-  }
-
-  renderStation(
-    state,
-    station
+  return stations.find(
+    s => s.id === game.route[game.current]
   );
 
 }
 
 
-function renderStation(state, station) {
+function showStation() {
 
-  const data =
-    STATIONS[station];
+  const station =
+    currentStation();
 
-  show(`
+  if (!station) {
+
+    showFinale();
+
+    return;
+  }
+
+  app.innerHTML = `
 
     <div class="topbar">
 
       <span>
-        ${esc(state.team)}
+        ${game.team}
       </span>
 
-      <span>
-        ${state.score} Punkte
-      </span>
+      <strong>
+        ${game.score} Punkte
+      </strong>
 
     </div>
 
-    <main class="card">
+    <main class="page">
 
-      <div class="eyebrow">
-        Euer nächstes Abenteuer
-      </div>
+      <div class="card">
 
-      <h1>
-        ${esc(data.title)}
-      </h1>
+        <div class="eyebrow">
+          Euer Abenteuer
+        </div>
 
-      <div id="stationContent">
+        <h1>
+          ${station.title}
+        </h1>
+
+        <div id="task"></div>
+
       </div>
 
     </main>
@@ -616,7 +477,7 @@ function renderStation(state, station) {
 
       <button
         class="tool"
-        onclick="openNotes()">
+        onclick="showNotes()">
         📝
       </button>
 
@@ -627,1909 +488,393 @@ function renderStation(state, station) {
       </button>
 
     </div>
-
-  `);
-
-  renderTask(
-    state,
-    station
-  );
-
-}
-
-
-/* ---------- Aufgabe laden ---------- */
-
-function renderTask(state, station) {
-
-  switch (station) {
-
-    case "wappen":
-      taskWappen(state);
-      break;
-
-    case "bergleute":
-      taskBergleute(state);
-      break;
-
-    case "jahreszahlen":
-      taskJahreszahlen(state);
-      break;
-
-    case "loewe":
-      taskLoewe(state);
-      break;
-
-    case "stromer":
-      taskStromer(state);
-      break;
-
-    case "auerochse":
-      taskAuerochse(state);
-      break;
-
-    case "buecherei":
-      taskBuecherei(state);
-      break;
-
-    case "kirche":
-      taskKirche(state);
-      break;
-
-    case "brunnen":
-      taskBrunnen(state);
-      break;
-
-    default:
-      alert("Unbekannte Aufgabe: " + station);
-
-  }
-
-}
-  function taskWappen(state) {
-
-  const box = $("stationContent");
-
-  box.innerHTML = `
-
-    <p>
-      Eine alte Nachricht wurde in zwölf Teile zerlegt.
-      Euer erstes Stück wartet dort, wo Auerbach
-      seine Geschichte in einem Zeichen trägt.
-    </p>
-
-    <h2>Setzt das Wappen zusammen</h2>
-
-    <div id="wappenPuzzle" class="puzzle">
-      <p class="muted">
-        Hier wird später das Wappenbild in 12 Teile geteilt.
-      </p>
-    </div>
-
-    <div id="wappenQuestion" hidden>
-
-      <p>
-        Wie heißen die drei Berge auf dem Wappen?
-      </p>
-
-      <input
-        id="berg1"
-        placeholder="Berg 1">
-
-      <input
-        id="berg2"
-        placeholder="Berg 2">
-
-      <input
-        id="berg3"
-        placeholder="Berg 3">
-
-      <button onclick="checkWappen(state)">
-        Antwort prüfen
-      </button>
-
-    </div>
-
-    ${hintButtons(state, "wappen")}
-
-    ${skipButton(state)}
-
   `;
 
-  buildWappenPuzzle();
+  renderTask(station.id);
 
 }
 
 
-function buildWappenPuzzle() {
+function renderTask(id) {
 
-  const puzzle =
-    $("wappenPuzzle");
+  const task =
+    document.getElementById("task");
 
-  const pieces =
-    Array.from(
-      {length:12},
-      (_,i) => i + 1
-    );
-
-  puzzle.innerHTML = pieces
-    .map(i => `
-      <button
-        class="puzzle-piece"
-        onclick="selectPuzzlePiece(this)">
-        ${i}
-      </button>
-    `)
-    .join("");
-
-}
-
-
-function selectPuzzlePiece(button) {
-
-  button.classList.add("selected");
-
-  const selected =
-    document.querySelectorAll(
-      ".puzzle-piece.selected"
-    );
-
-  if (selected.length === 12) {
-
-    $("wappenQuestion").hidden = false;
-
-  }
-
-}
-
-
-function checkWappen(state) {
-
-  const answers = [
-    $("berg1").value.trim().toLowerCase(),
-    $("berg2").value.trim().toLowerCase(),
-    $("berg3").value.trim().toLowerCase()
-  ];
-
-  /*
-    Die endgültigen drei Bergnamen
-    tragen wir nach der letzten Prüfung
-    der Auerbacher Wappenquelle ein.
-  */
-
-  const correct = [
-    "berg1",
-    "berg2",
-    "berg3"
-  ];
-
-  if (
-    answers.length === 3 &&
-    answers.every(x => x.length > 0)
-  ) {
-
-    solveStation(
-      state,
-      "wappen"
-    );
-
-  } else {
-
-    alert(
-      "Bitte gebt alle drei Berge ein."
-    );
-
-  }
-
-}
-
-
-/* ---------- Bergleute ---------- */
-
-function taskBergleute(state) {
-
-  $("stationContent").innerHTML = `
+  task.innerHTML = `
 
     <p>
-      Tief unter Auerbach wurden Nachrichten
-      manchmal so verschlüsselt, dass nur
-      die richtigen Empfänger sie lesen konnten.
+      Dieses Rätsel wird jetzt mit seiner
+      endgültigen Aufgabe gefüllt.
     </p>
 
-    <p>
-      Ein alter Bergmann hat eine Nachricht
-      hinterlassen. Jeder Buchstabe wurde im
-      Alphabet um die gleiche Anzahl Stellen
-      verschoben.
-    </p>
-
-    <div class="status info">
-
+    <div class="info">
       <strong>
-        Euer Schlüssel
+        Testversion
       </strong>
 
       <p>
-        Der Schlüssel steckt im Gruß der Bergleute.
-        Findet selbst heraus, welche Zahl ihr braucht.
+        Das technische Grundgerüst funktioniert.
+        Die echten Rätsel bauen wir jetzt einzeln ein.
       </p>
-
     </div>
 
-    <h2>Geheime Nachricht</h2>
-
-    <div class="cipher">
-      <strong>
-        GLÜCKAUF-KAMERAD
-      </strong>
-    </div>
-
-    <label>
-      Verschiebung
-      <input
-        id="caesarShift"
-        type="number"
-        min="0"
-        max="25"
-        placeholder="?">
-    </label>
-
-    <label>
-      Entschlüsselte Nachricht
-      <textarea
-        id="caesarAnswer"
-        rows="3"
-        placeholder="Schreibt hier eure Lösung hinein"></textarea>
-    </label>
-
-    <button
-      onclick="checkBergleute(state)">
-      Nachricht prüfen
+    <button onclick="solveStation()">
+      Testaufgabe lösen
     </button>
 
-    ${hintButtons(state, "bergleute")}
+    <br>
 
-    ${skipButton(state)}
+    <button
+      class="hint"
+      onclick="useHint('${id}')">
+      💡 Hinweis (−20 Punkte)
+    </button>
 
-  `;
+    <button
+      class="hint"
+      onclick="showLocationHint()">
+      📍 Ort anzeigen (−10 Punkte)
+    </button>
 
-}
-
-
-function checkBergleute(state) {
-
-  const shift =
-    Number(
-      $("caesarShift").value
-    );
-
-  const answer =
-    $("caesarAnswer")
-      .value
-      .trim()
-      .toLowerCase();
-
-  /*
-    Vorläufige technische Prüfung.
-    Die endgültige verschlüsselte Nachricht
-    kommt in den finalen Rätselblock.
-  */
-
-  if (
-    shift >= 1 &&
-    shift <= 25 &&
-    answer.length > 0
-  ) {
-
-    solveStation(
-      state,
-      "bergleute"
-    );
-
-  } else {
-
-    alert(
-      "Entschlüsselt die Nachricht zuerst."
-    );
-
-  }
-
-}
-
-
-/* ---------- Hinweisbuttons ---------- */
-
-function hintButtons(state, station) {
-
-  return `
-
-    <div class="hint-area">
-
-      <button
-        class="light"
-        onclick="
-          showHint(
-            '${station}',
-            1
-          )
-        ">
-        💡 Hinweis 1
-        (−${HINT_COST})
-      </button>
-
-      <button
-        class="light"
-        onclick="
-          showHint(
-            '${station}',
-            2
-          )
-        ">
-        💡 Hinweis 2
-        (−${HINT_COST})
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-
-/* ---------- Überspringen ---------- */
-
-function skipButton(state) {
-
-  return `
+    <br>
 
     <button
       class="secondary"
-      onclick="
-        skipStation()
-      ">
+      onclick="skipStation()">
       Aufgabe überspringen
     </button>
 
   `;
 
 }
-  function taskJahreszahlen(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      Auerbachs Geschichte steckt voller Wendepunkte.
-      Doch die Zahlen liegen nicht in der Reihenfolge,
-      in der die Ereignisse wirklich geschahen.
-    </p>
-
-    <p>
-      Ordnet die Ereignisse den richtigen Jahreszahlen zu.
-      Einige Jahreszahlen gehören zu keinem Ereignis.
-    </p>
-
-    <div id="yearsGame"></div>
-
-    <button onclick="checkYears(state)">
-      Zuordnung prüfen
-    </button>
-
-    ${hintButtons(state,"jahreszahlen")}
-    ${skipButton(state)}
-
-  `;
-
-  const events = [
-    "Auerbach erhält Stadtrechte",
-    "Auerbach wird Hauptstadt Neuböhmens",
-    "Auerbach wird Münzstätte",
-    "Das Rathaus wird erwähnt",
-    "Die Hussiten erreichen Auerbach",
-    "Ein Bergwerk am Arzberg wird erwähnt",
-    "Der Pfarrkirchturm entsteht",
-    "Heinrich Stromer wird geboren"
-  ];
-
-  const years = [
-    "1314","1373","1390","1418",
-    "1430","1434","1441","1476",
-    "1388","1427","1452","1461"
-  ];
-
-  $("yearsGame").innerHTML =
-    events.map((event,i) => `
-      <div class="year-row">
-
-        <span>
-          ${event}
-        </span>
-
-        <select id="year_${i}">
-          <option value="">Jahr wählen</option>
-
-          ${shuffle(years)
-            .map(y => `
-              <option value="${y}">
-                ${y}
-              </option>
-            `)
-            .join("")}
-
-        </select>
-
-      </div>
-    `).join("");
-
-}
 
 
-function checkYears(state) {
+function solveStation() {
 
-  const correct = [
-    "1314","1373","1390","1418",
-    "1430","1434","1441","1476"
-  ];
+  const id =
+    game.route[game.current];
 
-  const answers =
-    correct.map(
-      (_,i) =>
-        $(`year_${i}`).value
-    );
+  if (!game.solved.includes(id)) {
 
-  if (
-    answers.every(
-      (value,i) =>
-        value === correct[i]
-    )
-  ) {
-
-    solveStation(
-      state,
-      "jahreszahlen"
-    );
-
-  } else {
-
-    alert(
-      "Noch stimmt nicht alles. Prüft die Ereignisse noch einmal genau."
-    );
+    game.solved.push(id);
+    game.score += 100;
 
   }
 
-}
+  game.current++;
 
+  save();
 
-/* ---------- Goldener Löwe ---------- */
-
-function taskLoewe(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      Im Goldenen Löwen sitzen vier Gäste.
-      Jeder hat einen anderen Tisch,
-      ein anderes Essen und ein anderes Getränk.
-    </p>
-
-    <p>
-      Niemand hat seine Bestellung direkt
-      aufgeschrieben. Stattdessen erinnern sich
-      die Gäste nur an einzelne Hinweise.
-    </p>
-
-    <h2>Findet heraus, wer was bestellt hat.</h2>
-
-    <div class="logic-table">
-
-      <div class="logic-title">
-        Gäste
-      </div>
-
-      <div id="guestButtons"></div>
-
-      <div class="logic-title">
-        Tische
-      </div>
-
-      <div id="tableButtons"></div>
-
-      <div class="logic-title">
-        Essen
-      </div>
-
-      <div id="foodButtons"></div>
-
-      <div class="logic-title">
-        Getränke
-      </div>
-
-      <div id="drinkButtons"></div>
-
-    </div>
-
-    <div class="status info">
-
-      <strong>Erster Hinweis</strong>
-
-      <p>
-        Ein Gast sitzt zwei Tische weiter
-        als der Gast, der am Tisch 6 sitzt.
-      </p>
-
-    </div>
-
-    <button onclick="checkLoewe(state)">
-      Lösung prüfen
-    </button>
-
-    ${hintButtons(state,"loewe")}
-    ${skipButton(state)}
-
-  `;
-
-  const guests = [
-    "Anna",
-    "Jakob",
-    "Clara",
-    "Max"
-  ];
-
-  const tables = [
-    "Tisch 5",
-    "Tisch 6",
-    "Tisch 7",
-    "Tisch 8"
-  ];
-
-  const food = [
-    "Braten",
-    "Suppe",
-    "Brotzeit",
-    "Fisch"
-  ];
-
-  const drinks = [
-    "Wasser",
-    "Bier",
-    "Saft",
-    "Apfelschorle"
-  ];
-
-  createChoiceButtons(
-    "guestButtons",
-    guests
-  );
-
-  createChoiceButtons(
-    "tableButtons",
-    tables
-  );
-
-  createChoiceButtons(
-    "foodButtons",
-    food
-  );
-
-  createChoiceButtons(
-    "drinkButtons",
-    drinks
-  );
+  showTransition();
 
 }
 
-
-function createChoiceButtons(id, values) {
-
-  $(id).innerHTML =
-    values.map(value => `
-      <button
-        class="choice"
-        data-value="${value}"
-        onclick="selectChoice(this)">
-        ${value}
-      </button>
-    `).join("");
-
-}
-
-
-function selectChoice(button) {
-
-  button.classList.toggle("selected");
-
-}
-
-
-function checkLoewe(state) {
-
-  const selected =
-    document.querySelectorAll(
-      ".choice.selected"
-    );
-
-  if (selected.length < 4) {
-
-    alert(
-      "Trefft zuerst eure vier Zuordnungen."
-    );
-
-    return;
-
-  }
-
-  solveStation(
-    state,
-    "loewe"
-  );
-
-}
- function taskStromer(state) {
-
-  $("stationContent").innerHTML = `
-
-    <h2>Die Geschichte des Doktor Stromer</h2>
-
-    <p>
-      Lest die Geschichte aufmerksam durch.
-      Danach ist sie durcheinandergeraten.
-      Könnt ihr sie wieder richtig zusammensetzen?
-    </p>
-
-    <div class="story">
-      Heinrich Stromer wurde 1476 in Auerbach geboren.
-      Später führte ihn sein Weg nach Leipzig.
-      Dort wurde er Arzt und beschäftigte sich
-      außerdem mit Wissenschaft und dem Universitätsleben.
-      Bekannt wurde er später auch durch den Auerbacher Keller.
-    </div>
-
-    <div id="stromerCards"></div>
-
-    <button onclick="checkStromer(state)">
-      Geschichte zusammensetzen
-    </button>
-
-    ${hintButtons(state,"stromer")}
-    ${skipButton(state)}
-
-  `;
-
-  const cards = [
-    "Heinrich Stromer wird in Auerbach geboren.",
-    "Sein weiterer Weg führt ihn nach Leipzig.",
-    "Dort arbeitet er als Arzt.",
-    "Er wird Teil des Universitätslebens.",
-    "Später verbindet sich sein Name mit Auerbachs Keller."
-  ];
-
-  $("stromerCards").innerHTML =
-    shuffle(cards)
-      .map((text,i) => `
-        <div
-          class="story-card"
-          draggable="true"
-          data-order="${i}">
-          ${text}
-        </div>
-      `)
-      .join("");
-
-}
-
-
-function checkStromer(state) {
-
-  const cards =
-    [...document.querySelectorAll(
-      ".story-card"
-    )];
-
-  const order =
-    cards.map(card =>
-      card.textContent.trim()
-    );
-
-  const correct = [
-    "Heinrich Stromer wird in Auerbach geboren.",
-    "Sein weiterer Weg führt ihn nach Leipzig.",
-    "Dort arbeitet er als Arzt.",
-    "Er wird Teil des Universitätslebens.",
-    "Später verbindet sich sein Name mit Auerbachs Keller."
-  ];
-
-  if (
-    order.every(
-      (value,i) =>
-        value === correct[i]
-    )
-  ) {
-
-    solveStation(
-      state,
-      "stromer"
-    );
-
-  } else {
-
-    alert(
-      "Die Geschichte stimmt noch nicht ganz."
-    );
-
-  }
-
-}
-
-
-/* ---------- Auerochse ---------- */
-
-function taskAuerochse(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      Vier Menschen erinnern sich an den
-      Auerbacher Auerochsen.
-    </p>
-
-    <p>
-      Doch ihre Erinnerungen sind nicht vollständig.
-      Manche Aussagen stimmen, andere führen euch
-      bewusst auf eine falsche Spur.
-    </p>
-
-    <div id="memoryStatements">
-
-      <div class="person-card">
-        <h3>Anna</h3>
-        <p>
-          „Der Auerochse gehört zum Auerbacher
-          Stadtwappen.“
-        </p>
-        <p>
-          „1819 wurde er zum ersten Mal
-          in das Wappen aufgenommen.“
-        </p>
-      </div>
-
-      <div class="person-card">
-        <h3>Jakob</h3>
-        <p>
-          „Der Auerochse war schon auf alten
-          Auerbacher Siegeln zu sehen.“
-        </p>
-        <p>
-          „Seit 1819 gehört er ohne Unterbrechung
-          zum Stadtwappen.“
-        </p>
-      </div>
-
-      <div class="person-card">
-        <h3>Clara</h3>
-        <p>
-          „Echte Auerochsen leben heute noch
-          in Auerbach.“
-        </p>
-        <p>
-          „In den Grubenfeldern Leonie leben
-          Heckrinder.“
-        </p>
-      </div>
-
-      <div class="person-card">
-        <h3>Max</h3>
-        <p>
-          „Die Grubenfelder Leonie haben mit
-          dem Eisenerzbergbau zu tun.“
-        </p>
-        <p>
-          „Die Heckrinder wurden dort schon
-          vor dem Ende des Bergbaus eingesetzt.“
-        </p>
-      </div>
-
-    </div>
-
-    <p>
-      Wählt bei jeder Person die Aussage,
-      die ihr für richtig haltet.
-    </p>
-
-    <div id="truthButtons"></div>
-
-    <button onclick="checkAuerochse(state)">
-      Erinnerungen prüfen
-    </button>
-
-    ${hintButtons(state,"auerochse")}
-    ${skipButton(state)}
-
-  `;
-
-  const people = [
-    "Anna",
-    "Jakob",
-    "Clara",
-    "Max"
-  ];
-
-  $("truthButtons").innerHTML =
-    people.map(person => `
-      <button
-        class="truth-choice"
-        data-person="${person}"
-        onclick="chooseTruth(this)">
-        ${person}
-      </button>
-    `).join("");
-
-}
-
-
-function chooseTruth(button) {
-
-  const person =
-    button.dataset.person;
-
-  document
-    .querySelectorAll(
-      `.truth-choice[data-person="${person}"]`
-    )
-    .forEach(
-      b => b.classList.remove("selected")
-    );
-
-  button.classList.add("selected");
-
-}
-
-
-function checkAuerochse(state) {
-
-  const selected =
-    document.querySelectorAll(
-      ".truth-choice.selected"
-    );
-
-  if (selected.length < 4) {
-
-    alert(
-      "Wählt für alle vier Personen eine Aussage aus."
-    );
-
-    return;
-
-  }
-
-  solveStation(
-    state,
-    "auerochse"
-  );
-
-}
- function taskBuecherei(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      In einer alten Nachricht sind wichtige Wörter
-      verschwunden. Nur wer genau hinschaut, kann
-      sie wiederfinden.
-    </p>
-
-    <h2>Der Buchstabensalat</h2>
-
-    <p>
-      Findet die versteckten Wörter im Buchstabenfeld.
-      Sie können waagerecht, senkrecht oder diagonal
-      verlaufen.
-    </p>
-
-    <div id="wordGrid" class="word-grid"></div>
-
-    <p>
-      Gesucht werden Begriffe, die zu Auerbach,
-      dem Bürgerfest und den Geschichten der Rallye
-      passen.
-    </p>
-
-    <input
-      id="wordAnswer"
-      placeholder="Lösungswort">
-
-    <button onclick="checkBuecherei(state)">
-      Lösung prüfen
-    </button>
-
-    ${hintButtons(state,"buecherei")}
-    ${skipButton(state)}
-
-  `;
-
-  const letters =
-    "AUERBACHBERGBAUGEMEINSCHAFTMARKT" +
-    "VEREINGLÜCKAUFWAPPENSTROMER";
-
-  const grid = [];
-
-  for (let i = 0; i < 144; i++) {
-
-    grid.push(
-      letters[
-        Math.floor(
-          Math.random() * letters.length
-        )
-      ]
-    );
-
-  }
-
-  $("wordGrid").innerHTML =
-    grid.map((letter,i) => `
-      <button
-        class="grid-letter"
-        data-index="${i}"
-        onclick="selectLetter(this)">
-        ${letter}
-      </button>
-    `).join("");
-
-}
-
-
-function selectLetter(button) {
-
-  button.classList.toggle("selected");
-
-}
-
-
-function checkBuecherei(state) {
-
-  const answer =
-    $("wordAnswer")
-      .value
-      .trim()
-      .toLowerCase();
-
-  if (answer.length < 3) {
-
-    alert(
-      "Sucht zuerst die versteckten Begriffe."
-    );
-
-    return;
-
-  }
-
-  solveStation(
-    state,
-    "buecherei"
-  );
-
-}
-
-
-/* ---------- Kirche ---------- */
-
-function taskKirche(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      Tief unter Auerbach wurde über viele Jahre
-      Eisenerz gewonnen.
-    </p>
-
-    <p>
-      Ein Teil dieser Geschichte befindet sich
-      noch heute an einem ungewöhnlichen Ort.
-      Könnt ihr herausfinden, wo?
-    </p>
-
-    <p class="warning">
-      ⚠️ Wenn gerade ein Gottesdienst oder eine
-      andere Veranstaltung stattfindet, betretet
-      die Kirche bitte nicht. Nutzt dann nur
-      die vier Bilder auf eurem Handy.
-    </p>
-
-    <div class="image-choice" id="churchChoices">
-
-      <button onclick="chooseChurch(0)">
-        Bild 1
-      </button>
-
-      <button onclick="chooseChurch(1)">
-        Bild 2
-      </button>
-
-      <button onclick="chooseChurch(2)">
-        Bild 3
-      </button>
-
-      <button onclick="chooseChurch(3)">
-        Bild 4
-      </button>
-
-    </div>
-
-    <div id="churchNext" hidden>
-
-      <p>
-        Ihr habt die richtige Spur gefunden.
-      </p>
-
-      <p>
-        Das Eisenerz stammt aus der
-        <strong>Grube Leonie</strong>.
-      </p>
-
-      <h3>
-        Wo befindet sich der zweite Erzaltar?
-      </h3>
-
-      <button onclick="chooseNewYork(this)">
-        Auerbach
-      </button>
-
-      <button onclick="chooseNewYork(this)">
-        New York
-      </button>
-
-      <button onclick="chooseNewYork(this)">
-        London
-      </button>
-
-      <button onclick="chooseNewYork(this)">
-        Rom
-      </button>
-
-    </div>
-
-    ${hintButtons(state,"kirche")}
-    ${skipButton(state)}
-
-  `;
-
-}
-
-
-function chooseChurch(index) {
-
-  /*
-    Das richtige Bild wird eingesetzt,
-    sobald die endgültigen vier Kirchenbilder
-    feststehen.
-  */
-
-  if (index === 0) {
-
-    $("churchNext").hidden = false;
-
-  } else {
-
-    alert(
-      "Schaut euch die vier Bilder noch einmal genau an."
-    );
-
-  }
-
-}
-
-
-function chooseNewYork(button) {
-
-  if (
-    button.textContent.trim() ===
-    "New York"
-  ) {
-
-    const state = loadState();
-
-    solveStation(
-      state,
-      "kirche"
-    );
-
-  } else {
-
-    alert(
-      "Diese Spur führt euch nicht weiter."
-    );
-
-  }
-
-}
-
-
-/* ---------- Brunnen ---------- */
-
-function taskBrunnen(state) {
-
-  $("stationContent").innerHTML = `
-
-    <p>
-      Im Jahr 1144 wurde der Markt von Michelfeld
-      nach Auerbach verlegt.
-    </p>
-
-    <p>
-      Händler, Handwerker und Wirte brachten
-      Waren und Geschichten mit.
-    </p>
-
-    <p>
-      Doch eine Bestellung aus dieser Zeit
-      ist nur noch in einer geheimen Zeichensprache
-      erhalten.
-    </p>
-
-    <h2>Die geheime Bestellung</h2>
-
-    <div class="cipher">
-      <strong>
-        -... .-. --- -
-      </strong>
-    </div>
-
-    <p>
-      Nutzt das Morsealphabet und findet heraus,
-      welche Ware bestellt wurde.
-    </p>
-
-    <input
-      id="morseAnswer"
-      placeholder="Eure Lösung">
-
-    <button onclick="checkBrunnen(state)">
-      Bestellung prüfen
-    </button>
-
-    ${hintButtons(state,"brunnen")}
-    ${skipButton(state)}
-
-  `;
-
-}
-
-
-function checkBrunnen(state) {
-
-  const answer =
-    $("morseAnswer")
-      .value
-      .trim()
-      .toLowerCase();
-
-  if (answer === "brot") {
-
-    solveStation(
-      state,
-      "brunnen"
-    );
-
-  } else {
-
-    alert(
-      "Entschlüsselt die Bestellung noch einmal."
-    );
-
-  }
-
-}
- function showHint(station, number) {
-
-  const state = loadState();
-
-  if (!state) return;
-
-  const used =
-    state.hints[station] || 0;
-
-  if (used >= number) {
-
-    alert("Diesen Hinweis habt ihr bereits benutzt.");
-
-    return;
-
-  }
-
-  useHint(
-    state,
-    station
-  );
-
-  const hints = {
-
-    wappen: [
-      "Setzt zuerst alle Teile des Bildes zusammen.",
-      "Auf dem Wappen sind drei Berge zu erkennen."
-    ],
-
-    bergleute: [
-      "Bei der Caesar-Chiffre wird jeder Buchstabe gleich weit verschoben.",
-      "Der Schlüssel versteckt sich im Gruß der Bergleute."
-    ],
-
-    jahreszahlen: [
-      "Lest zuerst die Ereignisse genau. Einige Jahreszahlen gehören zu keinem Ereignis.",
-      "Vergleicht besonders die Ereignisse, die zeitlich nahe beieinanderliegen."
-    ],
-
-    loewe: [
-      "Beginnt mit den Informationen, bei denen Tisch oder Person bereits feststehen.",
-      "Zwei Tische weiter bedeutet wirklich genau zwei Plätze weiter."
-    ],
-
-    stromer: [
-      "Achtet auf Wörter wie später, danach und zuvor.",
-      "Beginnt mit dem Ereignis, das ganz am Anfang der Geschichte steht."
-    ],
-
-    auerochse: [
-      "Nicht jede Erinnerung kann stimmen. Vergleicht die Aussagen mit den echten Fakten.",
-      "1819 und 1963 sind wichtige Jahre in der Geschichte des Auerochsen."
-    ],
-
-    buecherei: [
-      "Die gesuchten Wörter können auch diagonal verlaufen.",
-      "Beginnt mit den Begriffen, die eindeutig zu Auerbach passen."
-    ],
-
-    kirche: [
-      "Denkt an das, was Auerbach über viele Jahre tief unter der Erde gewonnen hat.",
-      "Der gesuchte Gegenstand verbindet die Kirche mit dem früheren Bergbau."
-    ],
-
-    brunnen: [
-      "Bei Morsezeichen steht jeder Buchstabe für eine eigene Zeichenfolge.",
-      "Entschlüsselt Punkt für Punkt und Strich für Strich."
-    ]
-
-  };
-
-  const text =
-    hints[station]?.[number - 1]
-    || "Schaut euch die Aufgabe noch einmal genau an.";
-
-  alert(
-    "💡 Hinweis " + number +
-    "\n\n" + text +
-    "\n\n−" + HINT_COST + " Punkte"
-  );
-
-}
-
-
-/* ---------- Station lösen ---------- */
-
-function solveStation(state, station) {
-
-  if (
-    !state.solved.includes(station)
-  ) {
-
-    state.solved.push(station);
-
-  }
-
-  state.score +=
-    STATIONS[station].points;
-
-  saveState(state);
-
-  showTransition(
-    state,
-    station
-  );
-
-}
-
-
-/* ---------- Überspringen ---------- */
 
 function skipStation() {
 
-  const state =
-    loadState();
-
-  if (!state) return;
-
-  const station =
-    currentStation(state);
-
   if (
     !confirm(
-      "Aufgabe wirklich überspringen?"
+      "Möchtet ihr diese Aufgabe wirklich überspringen?"
     )
   ) {
-
     return;
-
   }
 
-  if (
-    !state.skipped.includes(station)
-  ) {
+  const id =
+    game.route[game.current];
 
-    state.skipped.push(station);
-
+  if (!game.skipped.includes(id)) {
+    game.skipped.push(id);
   }
 
-  saveState(state);
+  game.current++;
 
-  showTransition(
-    state,
-    station,
-    true
-  );
+  save();
+
+  showTransition(true);
 
 }
 
 
-/* ---------- Überleitung ---------- */
-
-function showTransition(
-  state,
-  station,
-  skipped = false
-) {
-
-  const nextPosition =
-    state.position + 1;
+function showTransition(skipped = false) {
 
   const next =
-    state.route[nextPosition];
+    currentStation();
 
-  const transitions = {
+  app.innerHTML = `
 
-    wappen:
-      "Wo einst Menschen tief unter der Erde arbeiteten, wartet eure nächste Spur.",
+    <main class="page">
 
-    bergleute:
-      "Zwischen alten Jahreszahlen versteckt sich die nächste Spur.",
+      <div class="card center">
 
-    jahreszahlen:
-      "Dort, wo einst Gäste an Tischen saßen und ihre Bestellungen aufgaben, geht eure Suche weiter.",
+        <div class="eyebrow">
+          ${skipped
+            ? "Aufgabe übersprungen"
+            : "Spur gefunden"}
+        </div>
 
-    loewe:
-      "Eine Geschichte über einen Auerbacher, dessen Weg weit über die Stadt hinausführte, wartet auf euch.",
+        <h1>
+          Eure nächste Spur wartet.
+        </h1>
 
-    stromer:
-      "Der Blick eines alten Wappentiers bewacht eure nächste Spur.",
+        <p>
+          Folgt der geheimnisvollen Spur
+          zum nächsten Ort.
+        </p>
 
-    auerochse:
-      "Wo viele Buchstaben nebeneinanderstehen, versteckt sich mehr, als man auf den ersten Blick erkennt.",
+        <button
+          onclick="showLocationHint()">
+          📍 Ort anzeigen (−10 Punkte)
+        </button>
 
-    buecherei:
-      "Ein Stück Auerbacher Bergbaugeschichte wartet in einem Gotteshaus.",
+        <br>
 
-    kirche:
-      "Dort, wo einst Marktleute ihre Waren anboten, wartet die nächste Spur.",
+        <button onclick="showStation()">
+          Weiter
+        </button>
 
-    brunnen:
-      "Ihr habt alle Spuren gefunden. Jetzt müsst ihr sie zusammenführen."
-
-  };
-
-  const text =
-    transitions[station]
-    || "Eure nächste Spur wartet.";
-
-  const nextName =
-    next
-      ? STATIONS[next].title
-      : "Das Finale";
-
-  state.position++;
-
-  saveState(state);
-
-  show(`
-
-    <main class="card transition">
-
-      <div class="eyebrow">
-        ${skipped
-          ? "Aufgabe übersprungen"
-          : "Spur gefunden"}
       </div>
 
-      <h1>
-        ${skipped
-          ? "Ihr könnt trotzdem weitermachen."
-          : "Die nächste Spur wartet."}
-      </h1>
-
-      <p>
-        ${text}
-      </p>
-
-      <p class="muted">
-        Folgt der Spur und sucht dort
-        nach dem nächsten QR-Code.
-      </p>
-
-      <button
-        class="light"
-        onclick="showLocation('${nextName}')">
-        📍 Ort anzeigen (−${LOCATION_COST} Punkte)
-      </button>
-
-      <button
-        onclick="mission(loadState())">
-        Weiter
-      </button>
-
     </main>
-
-  `);
+  `;
 
 }
 
 
-/* ---------- Ort anzeigen ---------- */
+function useHint(id) {
 
-function showLocation(place) {
+  game.hints[id] =
+    (game.hints[id] || 0) + 1;
 
-  const state =
-    loadState();
+  game.score =
+    Math.max(0, game.score - 20);
 
-  const station =
-    currentStation(state);
+  save();
 
-  if (
-    state.locationHints[station]
-  ) {
-
-    alert(
-      "📍 Eure nächste Spur:\n\n" +
-      place
-    );
-
-    return;
-
-  }
-
-  useLocationHint(
-    state,
-    station
+  alert(
+    "💡 Hinweis:\n\n" +
+    "Schaut euch die Aufgabe noch einmal ganz genau an."
   );
+
+}
+
+
+function showLocationHint() {
+
+  game.score =
+    Math.max(0, game.score - 10);
+
+  save();
+
+  const next =
+    currentStation();
 
   alert(
     "📍 Eure nächste Spur:\n\n" +
-    place +
-    "\n\n−" +
-    LOCATION_COST +
-    " Punkte"
+    (next
+      ? next.title
+      : "Das große Finale")
   );
 
 }
 
 
-/* ---------- Notizen ---------- */
+function showNotes() {
 
-function openNotes() {
+  app.innerHTML = `
 
-  const state =
-    loadState();
+    <main class="page">
 
-  show(`
+      <div class="card">
 
-    <main class="card">
+        <h1>📝 Notizen</h1>
 
-      <h2>📝 Eure Notizen</h2>
+        <textarea
+          id="notes"
+          rows="12"
+          placeholder="Eure Notizen...">${game.notes}</textarea>
 
-      <textarea
-        id="notes"
-        rows="10"
-        placeholder="Schreibt hier etwas auf ...">${esc(
-          state?.notes || ""
-        )}</textarea>
+        <button onclick="saveNotes()">
+          Speichern
+        </button>
 
-      <button onclick="saveNotes()">
-        Notizen speichern
-      </button>
+        <button
+          class="secondary"
+          onclick="showStation()">
+          Zurück
+        </button>
 
-      <button
-        class="secondary"
-        onclick="mission(loadState())">
-        Zurück
-      </button>
+      </div>
 
     </main>
-
-  `);
+  `;
 
 }
 
 
 function saveNotes() {
 
-  const state =
-    loadState();
+  game.notes =
+    document.getElementById("notes").value;
 
-  state.notes =
-    $("notes").value;
+  save();
 
-  saveState(state);
-
-  mission(state);
+  showStation();
 
 }
 
-
-/* ---------- Pause ---------- */
 
 function pauseGame() {
 
-  const state =
-    loadState();
+  app.innerHTML = `
 
-  show(`
+    <main class="page">
 
-    <main class="card pause">
+      <div class="card center">
 
-      <h1>⏸ Pause</h1>
+        <h1>⏸ Pause</h1>
 
-      <p>
-        Eure bisherigen Punkte bleiben gespeichert.
-      </p>
+        <p>
+          Eure Punkte und der bisherige Fortschritt
+          bleiben gespeichert.
+        </p>
 
-      <p class="score">
-        ${state.score} Punkte
-      </p>
+        <p class="big">
+          ${game.score} Punkte
+        </p>
 
-      <button
-        onclick="mission(loadState())">
-        Rallye fortsetzen
-      </button>
+        <button onclick="showStation()">
+          Rallye fortsetzen
+        </button>
 
-    </main>
-
-  `);
-
-}
-
-
-/* ---------- Finale ---------- */
-
-function finale(state) {
-
-  show(`
-
-    <main class="card">
-
-      <div class="eyebrow">
-        Das große Finale
       </div>
 
-      <h1>
-        Die Nachricht aus der Vergangenheit
-      </h1>
+    </main>
+  `;
 
-      <p>
-        Zwölf Teile einer alten Nachricht wurden
-        über eure Rallye verteilt.
-      </p>
+}
 
-      <p>
-        Jetzt müsst ihr sie wieder zusammenführen.
-      </p>
 
-      <div id="memoryGame"></div>
+function showFinale() {
+
+  app.innerHTML = `
+
+    <main class="page">
+
+      <div class="card center">
+
+        <div class="eyebrow">
+          Das große Finale
+        </div>
+
+        <h1>
+          Die Nachricht aus der Vergangenheit
+        </h1>
+
+        <p>
+          Hier kommt später das echte
+          24-Karten-Memory mit den zwölf
+          Teilen der geheimen Nachricht.
+        </p>
+
+        <button onclick="finalMessage()">
+          Finale öffnen
+        </button>
+
+      </div>
 
     </main>
-
-  `);
-
-  buildMemory();
+  `;
 
 }
 
-
-/* ---------- Memory ---------- */
-
-function buildMemory() {
-
-  const pairs = [
-
-    ["WAPPEN","Eine Stadt trägt ihre Geschichte in ihren Zeichen."],
-    ["BERGBAU","Auf andere zählen zu können, macht stark."],
-    ["MARKT","Wo Menschen zusammenkommen, entstehen Geschichten."],
-    ["STROMER","Eine Idee wird groß, wenn andere sie weitertragen."],
-    ["AUEROCHSE","Wer genau hinsieht, entdeckt mehr."],
-    ["BÜCHER","Manche Antworten warten darauf, gefunden zu werden."],
-    ["KIRCHE","Was bewahrt wird, kann weiter erzählen."],
-    ["GEMEINSCHAFT","Gemeinsam entsteht etwas Größeres."],
-    ["VEREIN","Jeder kann etwas beitragen."],
-    ["BÜRGERFEST","Viele Menschen machen ein Fest lebendig."],
-    ["GESCHICHTE","Was gestern geschah, kann morgen noch wichtig sein."],
-    ["ZUSAMMEN","Aus vielen Teilen wird ein Ganzes."]
-  ];
-
-  let cards = [];
-
-  pairs.forEach((pair,i) => {
-
-    cards.push({
-      id:i,
-      value:pair[0],
-      pair:i
-    });
-
-    cards.push({
-      id:i + 100,
-      value:pair[1],
-      pair:i
-    });
-
-  });
-
-  cards =
-    shuffle(cards);
-
-  window.memoryCards = cards;
-  window.memoryOpen = [];
-  window.memorySolved = [];
-
-  const game =
-    $("memoryGame");
-
-  game.innerHTML =
-    cards.map((card,i) => `
-      <button
-        class="memory-card"
-        data-index="${i}"
-        onclick="flipMemory(${i})">
-        ?
-      </button>
-    `).join("");
-
-}
-
-
-/* ---------- Memory drehen ---------- */
-
-function flipMemory(index) {
-
-  if (
-    window.memorySolved.includes(index)
-    ||
-    window.memoryOpen.includes(index)
-  ) {
-
-    return;
-
-  }
-
-  if (
-    window.memoryOpen.length >= 2
-  ) {
-
-    return;
-
-  }
-
-  const card =
-    window.memoryCards[index];
-
-  const button =
-    document.querySelector(
-      `.memory-card[data-index="${index}"]`
-    );
-
-  button.textContent =
-    card.value;
-
-  button.classList.add("open");
-
-  window.memoryOpen.push(index);
-
-  if (
-    window.memoryOpen.length === 2
-  ) {
-
-    setTimeout(
-      checkMemoryPair,
-      900
-    );
-
-  }
-
-}
-
-
-/* ---------- Memory Paar prüfen ---------- */
-
-function checkMemoryPair() {
-
-  const [a,b] =
-    window.memoryOpen;
-
-  const cardA =
-    window.memoryCards[a];
-
-  const cardB =
-    window.memoryCards[b];
-
-  const buttons =
-    [
-      document.querySelector(
-        `.memory-card[data-index="${a}"]`
-      ),
-      document.querySelector(
-        `.memory-card[data-index="${b}"]`
-      )
-    ];
-
-  if (
-    cardA.pair === cardB.pair
-  ) {
-
-    window.memorySolved.push(a);
-    window.memorySolved.push(b);
-
-    buttons.forEach(
-      button =>
-        button.classList.add("matched")
-    );
-
-  } else {
-
-    buttons.forEach(
-      (button,index) => {
-
-        setTimeout(() => {
-
-          button.textContent = "?";
-          button.classList.remove("open");
-
-        }, index * 100);
-
-      }
-    );
-
-  }
-
-  window.memoryOpen = [];
-
-  if (
-    window.memorySolved.length ===
-    window.memoryCards.length
-  ) {
-
-    setTimeout(
-      finalMessage,
-      500
-    );
-
-  }
-
-}
-
-
-/* ---------- Abschluss ---------- */
 
 function finalMessage() {
 
-  const state =
-    loadState();
+  app.innerHTML = `
 
-  state.finished = true;
+    <main class="page">
 
-  saveState(state);
+      <div class="card center">
 
-  show(`
+        <div class="eyebrow">
+          Die Nachricht ist vollständig
+        </div>
 
-    <main class="card finale-message">
+        <h1>
+          Was einer beginnt,
+          können viele vollenden.
+        </h1>
 
-      <div class="eyebrow">
-        Die Nachricht ist vollständig
+        <p>
+          Was viele gemeinsam tragen,
+          bleibt bestehen.
+        </p>
+
+        <p>
+          Denn eine Stadt ist nicht nur ein Ort.
+          Sie lebt durch die Menschen,
+          die sie gemeinsam gestalten.
+        </p>
+
+        <hr>
+
+        <h2>
+          Und genau das passiert hier.
+        </h2>
+
+        <p>
+          Unser Bürgerfest entsteht nicht von allein.
+          Es braucht Vereine, Gewerbetreibende,
+          Ehrenamtliche, Organisatoren und Besucher.
+        </p>
+
+        <p>
+          Vielleicht seid ihr die Nächsten.
+        </p>
+
+        <p>
+          Vielleicht findet ihr einen Verein,
+          der zu euch passt.
+          Vielleicht entdeckt ihr ein Hobby,
+          bei dem ihr mitmachen möchtet.
+          Vielleicht habt ihr irgendwann selbst
+          eine Idee, die ihr mit anderen umsetzt.
+        </p>
+
+        <h2>
+          Denn ihr habt heute selbst erlebt:
+        </h2>
+
+        <p class="big">
+          Alleine kann man etwas beginnen.<br>
+          Gemeinsam kann man etwas bewegen.
+        </p>
+
+        <h1>
+          AUERBACH LEBT DURCH EUCH. ❤️
+        </h1>
+
+        <p class="big">
+          ${game.score} Punkte
+        </p>
+
       </div>
 
-      <h1>
-        Was einer beginnt,
-        können viele vollenden.
-      </h1>
-
-      <p>
-        Was viele gemeinsam tragen,
-        bleibt bestehen.
-      </p>
-
-      <p>
-        Denn eine Stadt ist nicht nur ein Ort.
-        Sie lebt durch die Menschen,
-        die sie gemeinsam gestalten.
-      </p>
-
-      <hr>
-
-      <h2>
-        Und genau das passiert hier.
-      </h2>
-
-      <p>
-        Unser Bürgerfest entsteht nicht von allein.
-        Es braucht Vereine, Gewerbetreibende,
-        Unternehmen, Ehrenamtliche, Organisatoren
-        und natürlich euch – die Besucher.
-      </p>
-
-      <p>
-        Vielleicht seid ihr die Nächsten.
-      </p>
-
-      <p>
-        Vielleicht findet ihr einen Verein,
-        der zu euch passt.
-        Vielleicht entdeckt ihr ein Hobby,
-        bei dem ihr mitmachen möchtet.
-        Vielleicht habt ihr irgendwann selbst
-        eine Idee, die ihr mit anderen umsetzt.
-      </p>
-
-      <h2>
-        Denn ihr habt heute selbst erlebt:
-      </h2>
-
-      <p class="big-message">
-        Alleine kann man etwas beginnen.<br>
-        Gemeinsam kann man etwas bewegen.
-      </p>
-
-      <h1>
-        AUERBACH LEBT DURCH EUCH. ❤️
-      </h1>
-
-      <p class="score">
-        ${state.score} Punkte
-      </p>
-
     </main>
-
-  `);
-
-}
-
-
-/* ---------- Ende ---------- */
-
-function finish(state) {
-
-  finalMessage();
+  `;
 
 }
 
 
-/* ---------- Start ---------- */
+load();
 
-(function init() {
+if (game.team) {
+  showStation();
+} else {
+  startPage();
+}
 
-  const state =
-    loadState();
-
-  if (
-    state &&
-    !state.finished
-  ) {
-
-    mission(state);
-
-  } else {
-
-    landing();
-
-  }
-
-})();
-<body>
-
-  <div id="app"></div>
-
-  <script>  
-  </script>
-
-</body>
+</script>
+  </body>
 </html>
