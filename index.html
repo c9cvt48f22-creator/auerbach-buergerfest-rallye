@@ -3,878 +3,288 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stadtrallye Auerbach</title>
-
+<title>Die Nachricht aus der Vergangenheit</title>
 <style>
-  * {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4efe5;color:#2f2a24}
+#app{max-width:760px;margin:auto;padding:18px}
+.card{background:#fffaf1;border-radius:18px;padding:20px;box-shadow:0 4px 18px #0001}
+h1,h2,h3{margin-top:0}
+button,input,select{font:inherit}
+button{border:0;border-radius:12px;padding:12px 15px;margin:5px;background:#ead9bd;color:#2f2a24;cursor:pointer}
+button:hover{filter:brightness(.97)}
+input,select{width:100%;padding:11px;border:1px solid #cdbfa9;border-radius:10px;margin:6px 0 12px;background:white}
+.info,.clue,.warning,.success{padding:14px;border-radius:12px;margin:12px 0;background:#eee3d0}
+.warning{background:#f5dfb4}.success{background:#dcebdc}
+.big{font-size:1.2rem;font-weight:bold}.center{text-align:center}
+.hidden{display:none}
+.puzzle{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:520px;margin:15px auto}
+.piece{aspect-ratio:1;padding:0;border-radius:3px;background-repeat:no-repeat;background-color:#ddd}
+.piece.selected{outline:4px solid #b67827}
+.yearrow,.logicrow{display:grid;grid-template-columns:1.5fr 1fr;gap:8px;align-items:center;margin:8px 0}
+.logicrow{grid-template-columns:1fr 1fr 1fr 1fr}
+.logicrow strong{font-size:.9rem}
+.snippet{padding:10px;background:#f1e8da;border-radius:10px;margin:7px 0}
+.person{padding:12px;background:#f1e8da;border-radius:12px;margin:10px 0}
+.statement{display:block;width:100%;text-align:left}
+.statement.selected{outline:3px solid #b67827}
+.churchgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.churchchoice{margin:0;padding:8px}
+.churchimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px}
+.wordgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px}
+.letter{margin:0;padding:0;aspect-ratio:1;font-weight:bold;background:#eee4d5}
+.letter.selected{background:#b67827;color:white}
+.memory{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.memorycard{aspect-ratio:1;font-size:1.2rem;font-weight:bold;padding:5px}
+.memorycard.open,.memorycard.matched{background:#e4c995}
+.memorycard.matched{outline:3px solid #76936e}
+.controls{position:fixed;right:12px;bottom:12px;display:flex;gap:6px}
+.controls button{opacity:.8;font-size:.8rem}
+@media(max-width:600px){
+ #app{padding:10px}.card{padding:15px}
+ .logicrow{grid-template-columns:1fr}
+ .memory{grid-template-columns:repeat(4,1fr)}
 }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
-  background: #f4efe6;
-  color: #29251f;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  border: 0;
-  border-radius: 12px;
-  padding: 13px 18px;
-  margin: 5px;
-  cursor: pointer;
-  background: #29251f;
-  color: white;
-}
-
-button.secondary {
-  background: #d8d0c3;
-  color: #29251f;
-}
-
-button.hint {
-  background: transparent;
-  color: #29251f;
-  border: 1px solid #aaa;
-}
-
-#app {
-  min-height: 100vh;
-}
-
-.page {
-  max-width: 760px;
-  margin: auto;
-  padding: 24px 18px 100px;
-}
-
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  opacity: .6;
-}
-
-h1 {
-  font-size: clamp(32px, 9vw, 58px);
-  line-height: 1.05;
-  margin: 12px 0 20px;
-}
-
-h2 {
-  margin-top: 28px;
-}
-
-p {
-  line-height: 1.6;
-}
-
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 22px;
-  margin-top: 20px;
-  box-shadow: 0 5px 25px rgba(0,0,0,.08);
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 13px;
-  margin: 7px 0 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: white;
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin-top: 15px;
-}
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 18px;
-  background: rgba(244,239,230,.95);
-  backdrop-filter: blur(8px);
-}
-
-.bottom-tools {
-  position: fixed;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  gap: 6px;
-  z-index: 20;
-}
-
-.tool {
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border-radius: 50%;
-}
-
-.info {
-  padding: 15px;
-  background: #eee8dc;
-  border-radius: 12px;
-  margin: 18px 0;
-}
-
-.warning {
-  padding: 15px;
-  background: #f3dfbd;
-  border-radius: 12px;
-}
-
-.grid {
-  display: grid;
-  gap: 10px;
-}
-
-.grid.two {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.station-button {
-  min-height: 100px;
-  background: white;
-  color: #29251f;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-
-.choice.selected {
-  outline: 3px solid #29251f;
-}
-
-.story-card {
-  padding: 16px;
-  margin: 8px 0;
-  background: #f4efe6;
-  border-radius: 12px;
-}
-
-.memory {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.memory-card {
-  min-height: 90px;
-  padding: 8px;
-  font-size: 13px;
-}
-
-.memory-card.open,
-.memory-card.matched {
-  background: white;
-  color: #29251f;
-  outline: 3px solid #29251f;
-}
-
-.puzzle {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-.puzzle-piece {
-  aspect-ratio: 1;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.big {
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.center {
-  text-align: center;
-}
-
-.muted {
-  opacity: .65;
-}
-
-@media (max-width: 600px) {
-
-  .page {
-    padding: 18px 14px 100px;
-  }
-
-  .memory {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .grid.two {
-    grid-template-columns: 1fr;
-  }
-
-}
- </style>
+</style>
 </head>
-
 <body>
-
 <div id="app"></div>
 
 <script>
+const game={score:0,solved:{},started:false};
+const app=document.getElementById("app");
 
-const app = document.getElementById("app");
+function norm(x){
+ return String(x||"").toLowerCase().trim()
+ .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+ .replace(/Ã/g,"ss");
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
 
-const stations = [
-  {
-    id: "wappen",
-    title: "Das zerbrochene Stadtwappen"
-  },
-  {
-    id: "bergleute",
-    title: "Das Geheimnis der Bergleute"
-  },
-  {
-    id: "jahreszahlen",
-    title: "Die Zeitsprünge Auerbachs"
-  },
-  {
-    id: "loewe",
-    title: "Die Bestellung im Goldenen Löwen"
-  },
-  {
-    id: "stromer",
-    title: "Das Geheimnis des Doktor Stromer"
-  },
-  {
-    id: "auerochse",
-    title: "Das Gedächtnis des Goldenen Urs"
-  },
-  {
-    id: "buecherei",
-    title: "Der versteckte Buchstabensalat"
-  },
-  {
-    id: "kirche",
-    title: "Das Geheimnis im Erz"
-  },
-  {
-    id: "brunnen",
-    title: "Der geheime Markttag"
-  }
-];
-
-let game = {
-  team: "",
-  players: "",
-  score: 0,
-  route: [],
-  current: 0,
-  solved: [],
-  skipped: [],
-  hints: {},
-  locationHints: {},
-  notes: ""
-};
-
-
-function save() {
-  localStorage.setItem(
-    "auerbachRallye",
-    JSON.stringify(game)
-  );
+function controls(id){
+ return `
+ <div class="controls">
+   <button onclick="showHint('${id}')">ð¡ Hinweis</button>
+   <button onclick="toggleNotes()">ð</button>
+   <button onclick="pauseGame()">â¸</button>
+   <button onclick="showPlace('${id}')">ð Ort</button>
+ </div>`;
 }
 
-
-function load() {
-
-  const saved =
-    localStorage.getItem("auerbachRallye");
-
-  if (saved) {
-    game = JSON.parse(saved);
-  }
-
+function showHint(id){
+ const hints={
+  wappen:"Setzt zuerst alle zwÃ¶lf Teile zusammen.",
+  bergleute:"Verschiebt die Buchstaben im Alphabet immer gleich weit zurÃ¼ck.",
+  jahreszahlen:"Vergleicht besonders die Jahreszahlen, die nur wenige Jahre auseinanderliegen.",
+  loewe:"Beginnt mit dem bereits bekannten Tisch und arbeitet mit AusschlÃ¼ssen.",
+  stromer:"Achtet auf die Jahreszahlen in der Geschichte.",
+  auerochse:"Nicht jede Erinnerung kann gleichzeitig stimmen.",
+  buecherei:"Sucht nach Begriffen, die ihr aus Auerbach und der Rallye kennt.",
+  kirche:"Schaut euch jedes Bild sehr genau an.",
+  brunnen:"Im Morsealphabet steht jeder Buchstabe aus Punkten und Strichen.",
+  finale:"Im Finale mÃ¼sst ihr jedes Paar finden."
+ };
+ alert(hints[id]||"Schaut euch die Aufgabe noch einmal genau an.");
+ game.score=Math.max(0,game.score-1);
+ updateScore();
+}
+function showPlace(id){
+ const places={
+  wappen:"Sucht den nÃ¤chsten QR-Code dort, wo euch die Rallye hinfÃ¼hrt.",
+  bergleute:"Folgt dem Hinweis auf der Rallye-Karte zum nÃ¤chsten QR-Code.",
+  jahreszahlen:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  loewe:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  stromer:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  auerochse:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  buecherei:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  kirche:"Geht nur in die Kirche, wenn kein Gottesdienst stattfindet.",
+  brunnen:"Folgt der Ãberleitung zum nÃ¤chsten QR-Code.",
+  finale:"Ihr seid am Ziel."
+ };
+ alert(places[id]||"Folgt der Spur.");
+ game.score=Math.max(0,game.score-1);updateScore();
+}
+function toggleNotes(){
+ let n=document.getElementById("notes");
+ if(n){n.classList.toggle("hidden");return}
+ const d=document.createElement("div");
+ d.id="notes";d.style="position:fixed;left:10px;bottom:60px;background:white;padding:12px;border-radius:12px;box-shadow:0 3px 15px #0003;width:min(320px,90vw)";
+ d.innerHTML='<strong>Notizen</strong><textarea style="width:100%;height:120px;margin-top:8px" placeholder="Hier kÃ¶nnt ihr etwas notieren..."></textarea>';
+ document.body.appendChild(d);
+}
+function pauseGame(){alert("Pause. Wenn ihr weitermachen mÃ¶chtet, schlieÃt dieses Fenster.");}
+function updateScore(){const s=document.getElementById("score");if(s)s.textContent=game.score}
+function solve(id){
+ if(!game.solved[id]){game.solved[id]=true;game.score+=10}
+ updateScore();
+ alert("Geschafft! +10 Punkte");
+}
+function start(){
+ game.started=true;
+ app.innerHTML=`
+ <div class="card">
+  <h1>Die Nachricht aus der Vergangenheit</h1>
+  <p>Aus der Vergangenheit wurde eine Nachricht in zwÃ¶lf Teile Ã¼bermittelt. Eure Aufgabe ist es, die Spuren zu finden und die Nachricht StÃ¼ck fÃ¼r StÃ¼ck wieder zusammenzusetzen.</p>
+  <p>Jede Aufgabe bringt euch weiter. Manche Spuren lassen sich direkt lÃ¶sen, bei anderen mÃ¼sst ihr genau beobachten, kombinieren oder gemeinsam nachdenken.</p>
+  <div class="info"><strong>Eine Botschaft fÃ¼r euch:</strong><br>Was einer beginnt, kÃ¶nnen viele vollenden.</div>
+  <button onclick="renderTask('wappen')">Rallye beginnen</button>
+  <p>Punkte: <strong id="score">0</strong></p>
+ </div>`;
+}
+function renderTask(id){
+ const t=document.createElement("div");
+ t.className="card";
+ app.innerHTML="";
+ app.appendChild(t);
+ const f={
+  wappen:taskWappen,bergleute:taskBergleute,jahreszahlen:taskJahre,
+  loewe:taskLoewe,stromer:taskStromer,auerochse:taskAuerochse,
+  buecherei:taskBuecherei,kirche:taskKirche,brunnen:taskBrunnen
+ };
+ if(f[id])f[id](t);else showFinale();
 }
 
-
-function shuffle(array) {
-
-  return [...array].sort(
-    () => Math.random() - 0.5
-  );
-
+function taskWappen(t){
+ t.innerHTML=`<p>Aus der Vergangenheit wurde eine Nachricht in zwÃ¶lf Teile zerlegt. Euer erster Teil versteckt sich in einem Zeichen Auerbachs.</p><h2>Das zerbrochene Stadtwappen</h2><p>Setzt die zwÃ¶lf Teile wieder zusammen.</p><div id="wappenPuzzle" class="puzzle"></div><div id="wappenFrage" class="hidden"><div class="success">Das Wappen ist vollstÃ¤ndig.</div><h2>Jetzt genau hinsehen!</h2><p><strong>Wie heiÃen die drei Berge auf dem Wappen?</strong></p><input id="berg1" placeholder="Berg 1"><input id="berg2" placeholder="Berg 2"><input id="berg3" placeholder="Berg 3"><button onclick="checkWappen()">Antwort prÃ¼fen</button></div>${controls("wappen")}`;
+ window.wappenPieces=shuffle(Array.from({length:12},(_,i)=>i));window.wappenSelected=null;drawWappenPuzzle();
+}
+function drawWappenPuzzle(){
+ const p=document.getElementById("wappenPuzzle");if(!p)return;
+ p.innerHTML=window.wappenPieces.map((piece,pos)=>{let x=piece%4,y=Math.floor(piece/4);return `<button class="piece" id="wp${pos}" style="background-image:url('wappen.png');background-size:400% 300%;background-position:${x*33.3333}% ${y*50}%" onclick="clickWappenPiece(${pos})"></button>`}).join("");
+}
+function clickWappenPiece(pos){
+ if(window.wappenSelected===null){window.wappenSelected=pos;document.getElementById("wp"+pos).classList.add("selected");return}
+ if(window.wappenSelected===pos){window.wappenSelected=null;drawWappenPuzzle();return}
+ const a=window.wappenSelected;[window.wappenPieces[a],window.wappenPieces[pos]]=[window.wappenPieces[pos],window.wappenPieces[a]];window.wappenSelected=null;drawWappenPuzzle();
+ if(window.wappenPieces.every((x,i)=>x===i))document.getElementById("wappenFrage").classList.remove("hidden");
+}
+function checkWappen(){
+ const a=[1,2,3].map(i=>norm(document.getElementById("berg"+i).value));
+ const r=["Gottvaterberg","GrÃ¼nberg","Pinzigberg"].map(norm);
+ if(new Set(a).size===3&&r.every(x=>a.includes(x)))solve("wappen");else alert("Noch nicht. PrÃ¼ft die drei Bergnamen noch einmal.");
 }
 
-
-function startPage() {
-
-  app.innerHTML = `
-
-    <main class="page hero">
-
-      <div class="eyebrow">
-        Stadtrallye Bürgerfest
-      </div>
-
-      <h1>
-        Die Nachricht aus der Vergangenheit
-      </h1>
-
-      <p>
-        Vor langer Zeit wurde eine geheimnisvolle
-        Nachricht in zwölf Teile zerlegt.
-        Ihre Spuren führen mitten durch Auerbach.
-      </p>
-
-      <div class="card">
-
-        <label>
-          Teamname
-          <input
-            id="team"
-            placeholder="Euer Teamname">
-        </label>
-
-        <label>
-          Teammitglieder
-          <textarea
-            id="players"
-            rows="3"
-            placeholder="Namen der Teammitglieder"></textarea>
-        </label>
-
-        <button onclick="startGame()">
-          Rallye starten
-        </button>
-
-      </div>
-
-    </main>
-  `;
+function taskBergleute(t){
+ const geheim="JOXFNQX IYHJRKXQ YAZ CVDU XYPKXK";
+ t.innerHTML=`<p>Tief unter Auerbach mussten Nachrichten manchmal so weitergegeben werden, dass nicht jeder sie sofort lesen konnte.</p><p>Ein alter Zettel ist euch in die HÃ¤nde gefallen. Die Nachricht wurde mit einer Caesar-Chiffre verschlÃ¼sselt.</p><div class="info"><strong>Die Nachricht:</strong><p class="big center">${geheim}</p></div><p>Jeder Buchstabe wurde um die gleiche Anzahl Stellen im Alphabet verschoben. EntschlÃ¼sselt die Nachricht.</p><input id="caesarShift" type="number" min="1" max="25" placeholder="Verschiebung"><input id="caesarAnswer" placeholder="EntschlÃ¼sselte Nachricht"><button onclick="checkBergleute()">Nachricht prÃ¼fen</button>${controls("bergleute")}`;
+}
+function checkBergleute(){
+ const shift=Number(document.getElementById("caesarShift").value),ans=norm(document.getElementById("caesarAnswer").value);
+ const richtig=norm("GLUECKAUF DIE SPUR FUEHRT WEITER");
+ if(shift===3&&ans===richtig)solve("bergleute");else alert("Die Nachricht ist noch nicht richtig entschlÃ¼sselt.");
 }
 
-
-function startGame() {
-
-  const team =
-    document.getElementById("team")
-      .value.trim();
-
-  const players =
-    document.getElementById("players")
-      .value.trim();
-
-  if (!team || !players) {
-
-    alert(
-      "Bitte Teamname und Teammitglieder eingeben."
-    );
-
-    return;
-  }
-
-  game = {
-    team,
-    players,
-    score: 0,
-    route: shuffle(
-      stations.map(s => s.id)
-    ),
-    current: 0,
-    solved: [],
-    skipped: [],
-    hints: {},
-    locationHints: {},
-    notes: ""
-  };
-
-  save();
-
-  showStation();
-
+function taskJahre(t){
+ const d=[["Auerbach wird Hauptstadt von NeubÃ¶hmen","1373"],["Auerbach wird MÃ¼nzstÃ¤tte","1390"],["Das gotische Rathaus wird errichtet","1418"],["Die Hussiten erreichen Auerbach","1430"],["Das Bergwerk am Arzberg wird errichtet","1434"],["Der Pfarrkirchturm wird errichtet","1441"]];
+ const z=shuffle(["1373","1390","1418","1430","1434","1441","1388","1392","1427","1438","1452","1461"]);
+ t.innerHTML=`<p>Sechs Ereignisse aus Auerbachs Geschichte mÃ¼ssen zeitlich richtig eingeordnet werden.</p><p>Einige Jahreszahlen gehÃ¶ren zu keinem Ereignis und manche liegen sehr nah beieinander.</p><div id="jahreListe"></div><button onclick="checkJahre()">Zuordnung prÃ¼fen</button>${controls("jahreszahlen")}`;
+ document.getElementById("jahreListe").innerHTML=d.map((e,i)=>`<div class="yearrow"><span>${e[0]}</span><select id="jahr${i}"><option value="">Jahr</option>${z.map(x=>`<option>${x}</option>`).join("")}</select></div>`).join("");
+}
+function checkJahre(){
+ const r=["1373","1390","1418","1430","1434","1441"];
+ if(r.every((x,i)=>document.getElementById("jahr"+i).value===x))solve("jahreszahlen");else alert("Noch nicht. Vergleicht besonders die Ereignisse, deren Jahreszahlen sehr nah beieinanderliegen.");
 }
 
-
-function currentStation() {
-
-  return stations.find(
-    s => s.id === game.route[game.current]
-  );
-
+function taskLoewe(t){
+ const g=["Anna","Ben","Clara","David"],ti=["5","6","7","8"],e=["Braten","Suppe","Brotzeit","Fisch"],d=["Wasser","Bier","Saft","Schorle"];
+ t.innerHTML=`<p>Vier GÃ¤ste saÃen im Goldenen LÃ¶wen. Jeder saÃ an einem anderen Tisch, bestellte ein anderes Essen und trank etwas anderes.</p><div class="clue">Ben saÃ am Tisch 6.</div><div class="clue">Der Gast zwei Tische weiter als Ben saÃ am Tisch 8.</div><div class="clue">Clara saÃ direkt neben Ben.</div><div class="clue">Am Tisch 5 wurde Suppe bestellt.</div><div class="clue">Am Tisch 8 wurde Fisch bestellt.</div><div class="clue">Wer Braten bestellte, trank Bier.</div><div class="clue">Zur Brotzeit wurde Wasser getrunken.</div><div class="clue">Anna trank keinen Alkohol.</div><h2>Ordnet alles zu</h2><div id="loewenTabelle"></div><button onclick="checkLoewe()">LÃ¶sung prÃ¼fen</button>${controls("loewe")}`;
+ document.getElementById("loewenTabelle").innerHTML=g.map(x=>`<div class="logicrow"><strong>${x}</strong><select id="lt${x}"><option>â</option>${ti.map(v=>`<option>${v}</option>`).join("")}</select><select id="le${x}"><option>â</option>${e.map(v=>`<option>${v}</option>`).join("")}</select><select id="lg${x}"><option>â</option>${d.map(v=>`<option>${v}</option>`).join("")}</select></div>`).join("");
+}
+function checkLoewe(){
+ const r={Anna:["5","Suppe","Saft"],Ben:["6","Braten","Bier"],Clara:["7","Brotzeit","Wasser"],David:["8","Fisch","Schorle"]};
+ const ok=Object.keys(r).every(g=>document.getElementById("lt"+g).value===r[g][0]&&document.getElementById("le"+g).value===r[g][1]&&document.getElementById("lg"+g).value===r[g][2]);
+ if(ok)solve("loewe");else alert("Noch stimmt die Zuordnung nicht.");
 }
 
-
-function showStation() {
-
-  const station =
-    currentStation();
-
-  if (!station) {
-
-    showFinale();
-
-    return;
-  }
-
-  app.innerHTML = `
-
-    <div class="topbar">
-
-      <span>
-        ${game.team}
-      </span>
-
-      <strong>
-        ${game.score} Punkte
-      </strong>
-
-    </div>
-
-    <main class="page">
-
-      <div class="card">
-
-        <div class="eyebrow">
-          Euer Abenteuer
-        </div>
-
-        <h1>
-          ${station.title}
-        </h1>
-
-        <div id="task"></div>
-
-      </div>
-
-    </main>
-
-    <div class="bottom-tools">
-
-      <button
-        class="tool"
-        onclick="showNotes()">
-        📝
-      </button>
-
-      <button
-        class="tool"
-        onclick="pauseGame()">
-        ⏸
-      </button>
-
-    </div>
-  `;
-
-  renderTask(station.id);
-
+function taskStromer(t){
+ const s=["Heinrich Stromer wird 1476 in Auerbach geboren.","Er geht nach Leipzig und beginnt dort seine akademische Laufbahn.","1508 wird er Rektor der UniversitÃ¤t Leipzig.","1511 erhÃ¤lt er den Doktortitel der Medizin.","Sein Name bleibt mit Auerbachs Keller verbunden."];
+ window.stromerGemischt=shuffle(s);
+ t.innerHTML=`<h2>Die Geschichte von Doktor Stromer</h2><div class="story"><p>Heinrich Stromer wurde 1476 in Auerbach geboren. Sein Weg fÃ¼hrte ihn spÃ¤ter nach Leipzig. Dort begann seine akademische Laufbahn. 1508 wurde er Rektor der UniversitÃ¤t Leipzig. 1511 erhielt er den Doktortitel der Medizin. Sein Name blieb auÃerdem mit Auerbachs Keller verbunden.</p></div><p>Die Geschichte wurde in fÃ¼nf Schnipsel zerlegt. Bringt sie wieder in die richtige Reihenfolge.</p><div id="stromerListe"></div><button onclick="checkStromer()">Reihenfolge prÃ¼fen</button>${controls("stromer")}`;
+ document.getElementById("stromerListe").innerHTML=window.stromerGemischt.map((x,i)=>`<div class="snippet"><select id="st${i}">${window.stromerGemischt.map((_,n)=>`<option value="${n}">${n+1}</option>`).join("")}</select> ${x}</div>`).join("");
+}
+function checkStromer(){
+ const r=["Heinrich Stromer wird 1476 in Auerbach geboren.","Er geht nach Leipzig und beginnt dort seine akademische Laufbahn.","1508 wird er Rektor der UniversitÃ¤t Leipzig.","1511 erhÃ¤lt er den Doktortitel der Medizin.","Sein Name bleibt mit Auerbachs Keller verbunden."];
+ if(window.stromerGemischt.every((x,i)=>r[Number(document.getElementById("st"+i).value)]===x))solve("stromer");else alert("Die Reihenfolge stimmt noch nicht.");
 }
 
-
-function renderTask(id) {
-
-  const task =
-    document.getElementById("task");
-
-  task.innerHTML = `
-
-    <p>
-      Dieses Rätsel wird jetzt mit seiner
-      endgültigen Aufgabe gefüllt.
-    </p>
-
-    <div class="info">
-      <strong>
-        Testversion
-      </strong>
-
-      <p>
-        Das technische Grundgerüst funktioniert.
-        Die echten Rätsel bauen wir jetzt einzeln ein.
-      </p>
-    </div>
-
-    <button onclick="solveStation()">
-      Testaufgabe lösen
-    </button>
-
-    <br>
-
-    <button
-      class="hint"
-      onclick="useHint('${id}')">
-      💡 Hinweis (−20 Punkte)
-    </button>
-
-    <button
-      class="hint"
-      onclick="showLocationHint()">
-      📍 Ort anzeigen (−10 Punkte)
-    </button>
-
-    <br>
-
-    <button
-      class="secondary"
-      onclick="skipStation()">
-      Aufgabe überspringen
-    </button>
-
-  `;
-
+function taskAuerochse(t){
+ const p=[["Anna","Der Auerochse gehÃ¶rt zum Auerbacher Stadtwappen.","Der Auerochse wurde erst vor wenigen Jahren zum Wappentier."],["Jakob","Die Grubenfelder Leonie gehÃ¶ren zur Auerbacher Bergbaugeschichte.","Die Grubenfelder Leonie haben mit dem Bergbau nichts zu tun."],["Clara","Auf den Grubenfeldern leben Heckrinder.","Auf den Grubenfeldern leben heute noch echte wilde Auerochsen."],["Max","Der Auerochse ist Teil der Geschichte Auerbachs.","Der Auerochse hat mit Auerbach Ã¼berhaupt nichts zu tun."]];
+ t.innerHTML=`<p>Vier Menschen erinnern sich an den Auerochsen. Aber ihre Erinnerungen widersprechen sich.</p><p>Bei jeder Person ist nur eine Aussage richtig.</p><div id="ochsen"></div><button onclick="checkAuerochse()">Erinnerungen prÃ¼fen</button>${controls("auerochse")}`;
+ document.getElementById("ochsen").innerHTML=p.map((x,i)=>`<div class="person"><h3>${x[0]}</h3><button class="statement" data-p="${i}" data-a="A" onclick="selectOchsen(this)">A: ${x[1]}</button><button class="statement" data-p="${i}" data-a="B" onclick="selectOchsen(this)">B: ${x[2]}</button></div>`).join("");
+}
+function selectOchsen(b){
+ const p=b.dataset.p;document.querySelectorAll('.statement[data-p="'+p+'"]').forEach(x=>x.classList.remove("selected"));b.classList.add("selected");
+}
+function checkAuerochse(){
+ const a=[...document.querySelectorAll(".statement.selected")];
+ if(a.length!==4){alert("WÃ¤hlt bei allen vier Personen eine Aussage.");return}
+ if(a.every(b=>b.dataset.a==="A"))solve("auerochse");else alert("Eine Erinnerung stimmt noch nicht.");
 }
 
-
-function solveStation() {
-
-  const id =
-    game.route[game.current];
-
-  if (!game.solved.includes(id)) {
-
-    game.solved.push(id);
-    game.score += 100;
-
-  }
-
-  game.current++;
-
-  save();
-
-  showTransition();
-
+function taskBuecherei(t){
+ const w=["AUERBACH","BERGBAU","BURGERFEST","VEREIN","MARKT","GLUECKAUF","WAPPEN","EHRENAMT","STROMER","GEMEINSCHAFT"];
+ const f=["AUERBACHXYZK","QBERGBAUMNRS","TUVBURGERFEST","WXYZVEREINAB","GLUECKAUFCDR","WAPPENEFGHST","MARKTIJKLMNO","EHRENAMTPQRS","GEMEINSCHAFT","STROMERUVWXY","AABERGBBAUCD","FESTAUERBACH"].join("");
+ window.buecherWoerter=w;
+ t.innerHTML=`<p>Die BÃ¼cherei ist beim BÃ¼rgerfest geschlossen. Trotzdem hat sie eine Spur hinterlassen.</p><h2>Der Buchstabensalat</h2><p>Findet die Begriffe, die mit Auerbach und der Rallye zu tun haben.</p><div id="buchstabenfeld" class="wordgrid"></div><p>Markierte Buchstaben: <strong id="buchZaehler">0</strong></p><button onclick="checkBuecherei()">WÃ¶rter prÃ¼fen</button>${controls("buecherei")}`;
+ document.getElementById("buchstabenfeld").innerHTML=f.split("").map(x=>`<button class="letter" onclick="this.classList.toggle('selected');updateBuchZaehler()">${x}</button>`).join("");
+}
+function updateBuchZaehler(){document.getElementById("buchZaehler").textContent=document.querySelectorAll("#buchstabenfeld .selected").length}
+function checkBuecherei(){
+ const m=[...document.querySelectorAll("#buchstabenfeld .selected")].map(x=>x.textContent.trim()).join("");
+ const n=window.buecherWoerter.filter(x=>m.includes(x)).length;
+ if(n>=5)solve("buecherei");else alert("Ihr habt noch nicht genug Begriffe gefunden.");
 }
 
+function taskKirche(t){
+ t.innerHTML=`<p>Auerbachs Geschichte ist eng mit dem Eisenerz verbunden.</p><div class="warning">â ï¸ Wenn Gottesdienst ist, bleibt bitte drauÃen. Dann nutzt ausschlieÃlich die vier Bilder.</div><p>Auf welchem Bild entdeckt ihr die Spur, ohne dass euch verraten wird, wonach ihr suchen mÃ¼sst?</p><div class="churchgrid">${[1,2,3,4].map(i=>`<button class="churchchoice" onclick="kircheAuswahl(${i})"><img src="kirche${i}.jpg" class="churchimg" alt="Bild ${i}"><strong>Bild ${i}</strong></button>`).join("")}</div><div id="erzfrage" class="hidden"></div>${controls("kirche")}`;
+}
+function kircheAuswahl(n){
+ if(n!==1){alert("Noch nicht. Schaut euch die vier Bilder ganz genau an.");return}
+ const b=document.getElementById("erzfrage");b.classList.remove("hidden");b.innerHTML=`<div class="success"><p>Ihr habt die richtige Spur entdeckt.</p><p>Es gibt nur zwei ErzaltÃ¤re dieser besonderen Art.</p><h3>Wo befindet sich der andere?</h3><button onclick="erzaltarAntwort('Auerbach')">Auerbach</button><button onclick="erzaltarAntwort('New York')">New York</button><button onclick="erzaltarAntwort('London')">London</button><button onclick="erzaltarAntwort('Rom')">Rom</button></div>`;
+}
+function erzaltarAntwort(x){if(x==="New York")solve("kirche");else alert("Noch nicht. Denkt an die Besonderheit des Erzaltars.");}
 
-function skipStation() {
-
-  if (
-    !confirm(
-      "Möchtet ihr diese Aufgabe wirklich überspringen?"
-    )
-  ) {
-    return;
-  }
-
-  const id =
-    game.route[game.current];
-
-  if (!game.skipped.includes(id)) {
-    game.skipped.push(id);
-  }
-
-  game.current++;
-
-  save();
-
-  showTransition(true);
-
+function taskBrunnen(t){
+ t.innerHTML=`<p>1144 wurde der Markt von Michelfeld nach Auerbach verlegt.</p><p>Markttage brachten HÃ¤ndler, Handwerker und Besucher zusammen. Eine Bestellung sollte schnell weitergegeben werden.</p><div class="info"><strong>Die geheime Bestellung:</strong><p class="big center">-... .-. --- -</p></div><p>EntschlÃ¼sselt die Bestellung mit dem Morsealphabet.</p><input id="morseAntwort" placeholder="Was wurde bestellt?"><button onclick="checkBrunnen()">Bestellung prÃ¼fen</button>${controls("brunnen")}`;
+}
+function checkBrunnen(){
+ if(norm(document.getElementById("morseAntwort").value)==="brot")solve("brunnen");else alert("Noch nicht. Punkt fÃ¼r Punkt und Strich fÃ¼r Strich.");
 }
 
-
-function showTransition(skipped = false) {
-
-  const next =
-    currentStation();
-
-  app.innerHTML = `
-
-    <main class="page">
-
-      <div class="card center">
-
-        <div class="eyebrow">
-          ${skipped
-            ? "Aufgabe übersprungen"
-            : "Spur gefunden"}
-        </div>
-
-        <h1>
-          Eure nächste Spur wartet.
-        </h1>
-
-        <p>
-          Folgt der geheimnisvollen Spur
-          zum nächsten Ort.
-        </p>
-
-        <button
-          onclick="showLocationHint()">
-          📍 Ort anzeigen (−10 Punkte)
-        </button>
-
-        <br>
-
-        <button onclick="showStation()">
-          Weiter
-        </button>
-
-      </div>
-
-    </main>
-  `;
-
+function showFinale(){
+ app.innerHTML=`<main class="page"><div class="card"><div class="eyebrow">Das groÃe Finale</div><h1>Die zwÃ¶lf Teile</h1><p>Ihr habt die Spuren aus Auerbach gesammelt. Jetzt mÃ¼sst ihr die Nachricht aus der Vergangenheit wieder zusammensetzen.</p><div class="info"><strong>Memory-Regeln</strong><p>Deckt zwei Karten auf. GehÃ¶ren sie zusammen, bleiben sie offen. Sind sie falsch, werden beide wieder umgedreht.</p></div><div id="finalMemory" class="memory"></div><div id="finaleNachricht" class="hidden"></div></div></main>`;
+ startFinalMemory();
+}
+function startFinalMemory(){
+ const p=[["ðï¸","AUERBACH"],["âï¸","BERGBAU"],["ð","AUEROCHSE"],["ð","GESCHICHTE"],["ð¦","GOLDENER LÃWE"],["âª","ERZALTAR"],["â²","MARKT"],["ð","BÃCHEREI"],["ð¨ââï¸","STROMER"],["ð¤","ZUSAMMENHALT"],["ð","BÃRGERFEST"],["â¤ï¸","ENGAGEMENT"]];
+ window.memoryCards=[];p.forEach((x,i)=>{window.memoryCards.push({paar:i,text:x[0]});window.memoryCards.push({paar:i,text:x[1]})});
+ window.memoryCards=shuffle(window.memoryCards);window.memoryOffen=[];window.memoryGefunden=[];zeichneMemory();
+}
+function zeichneMemory(){
+ document.getElementById("finalMemory").innerHTML=window.memoryCards.map((x,i)=>`<button class="memorycard" id="memory${i}" onclick="memoryAufdecken(${i})">?</button>`).join("");
+}
+function memoryAufdecken(i){
+ if(window.memoryGefunden.includes(i)||window.memoryOffen.includes(i)||window.memoryOffen.length>=2)return;
+ const b=document.getElementById("memory"+i);b.textContent=window.memoryCards[i].text;b.classList.add("open");window.memoryOffen.push(i);
+ if(window.memoryOffen.length===2)setTimeout(pruefeMemory,700);
+}
+function pruefeMemory(){
+ const a=window.memoryOffen[0],b=window.memoryOffen[1];
+ if(window.memoryCards[a].paar===window.memoryCards[b].paar){
+  document.getElementById("memory"+a).classList.add("matched");document.getElementById("memory"+b).classList.add("matched");
+  window.memoryGefunden.push(a,b);window.memoryOffen=[];
+  if(window.memoryGefunden.length===window.memoryCards.length)setTimeout(finaleNachricht,500);
+ }else{
+  setTimeout(()=>{document.getElementById("memory"+a).textContent="?";document.getElementById("memory"+b).textContent="?";document.getElementById("memory"+a).classList.remove("open");document.getElementById("memory"+b).classList.remove("open");},200);
+  window.memoryOffen=[];
+ }
+}
+function finaleNachricht(){
+ const b=document.getElementById("finaleNachricht");b.classList.remove("hidden");
+ b.innerHTML=`<div class="success"><h2>Die Nachricht ist vollstÃ¤ndig.</h2><p class="big">Was einer beginnt, kÃ¶nnen viele vollenden.</p><p>Was viele gemeinsam tragen, bleibt bestehen.</p><p>Eine Stadt ist nicht nur ein Ort. Sie lebt durch die Menschen, die sie gemeinsam gestalten.</p><hr><h2>Und genau das passiert beim BÃ¼rgerfest.</h2><p>Unser BÃ¼rgerfest entsteht nicht von allein. Es braucht Vereine, Gewerbetreibende, Ehrenamtliche, Organisatoren und Besucher. Jeder trÃ¤gt auf seine Weise dazu bei.</p><p>Vielleicht seid ihr die NÃ¤chsten. Vielleicht findet ihr einen Verein, ein Hobby oder eine Aufgabe, bei der ihr mitmachen mÃ¶chtet. Vielleicht habt ihr irgendwann selbst eine Idee, die ihr mit anderen umsetzt.</p><p class="big">Alleine kann man etwas beginnen.<br>Gemeinsam kann man etwas bewegen.</p><h1>AUERBACH LEBT DURCH EUCH. â¤ï¸</h1><p class="big">${game.score} Punkte</p></div>`;
 }
 
-
-function useHint(id) {
-
-  game.hints[id] =
-    (game.hints[id] || 0) + 1;
-
-  game.score =
-    Math.max(0, game.score - 20);
-
-  save();
-
-  alert(
-    "💡 Hinweis:\n\n" +
-    "Schaut euch die Aufgabe noch einmal ganz genau an."
-  );
-
-}
-
-
-function showLocationHint() {
-
-  game.score =
-    Math.max(0, game.score - 10);
-
-  save();
-
-  const next =
-    currentStation();
-
-  alert(
-    "📍 Eure nächste Spur:\n\n" +
-    (next
-      ? next.title
-      : "Das große Finale")
-  );
-
-}
-
-
-function showNotes() {
-
-  app.innerHTML = `
-
-    <main class="page">
-
-      <div class="card">
-
-        <h1>📝 Notizen</h1>
-
-        <textarea
-          id="notes"
-          rows="12"
-          placeholder="Eure Notizen...">${game.notes}</textarea>
-
-        <button onclick="saveNotes()">
-          Speichern
-        </button>
-
-        <button
-          class="secondary"
-          onclick="showStation()">
-          Zurück
-        </button>
-
-      </div>
-
-    </main>
-  `;
-
-}
-
-
-function saveNotes() {
-
-  game.notes =
-    document.getElementById("notes").value;
-
-  save();
-
-  showStation();
-
-}
-
-
-function pauseGame() {
-
-  app.innerHTML = `
-
-    <main class="page">
-
-      <div class="card center">
-
-        <h1>⏸ Pause</h1>
-
-        <p>
-          Eure Punkte und der bisherige Fortschritt
-          bleiben gespeichert.
-        </p>
-
-        <p class="big">
-          ${game.score} Punkte
-        </p>
-
-        <button onclick="showStation()">
-          Rallye fortsetzen
-        </button>
-
-      </div>
-
-    </main>
-  `;
-
-}
-
-
-function showFinale() {
-
-  app.innerHTML = `
-
-    <main class="page">
-
-      <div class="card center">
-
-        <div class="eyebrow">
-          Das große Finale
-        </div>
-
-        <h1>
-          Die Nachricht aus der Vergangenheit
-        </h1>
-
-        <p>
-          Hier kommt später das echte
-          24-Karten-Memory mit den zwölf
-          Teilen der geheimen Nachricht.
-        </p>
-
-        <button onclick="finalMessage()">
-          Finale öffnen
-        </button>
-
-      </div>
-
-    </main>
-  `;
-
-}
-
-
-function finalMessage() {
-
-  app.innerHTML = `
-
-    <main class="page">
-
-      <div class="card center">
-
-        <div class="eyebrow">
-          Die Nachricht ist vollständig
-        </div>
-
-        <h1>
-          Was einer beginnt,
-          können viele vollenden.
-        </h1>
-
-        <p>
-          Was viele gemeinsam tragen,
-          bleibt bestehen.
-        </p>
-
-        <p>
-          Denn eine Stadt ist nicht nur ein Ort.
-          Sie lebt durch die Menschen,
-          die sie gemeinsam gestalten.
-        </p>
-
-        <hr>
-
-        <h2>
-          Und genau das passiert hier.
-        </h2>
-
-        <p>
-          Unser Bürgerfest entsteht nicht von allein.
-          Es braucht Vereine, Gewerbetreibende,
-          Ehrenamtliche, Organisatoren und Besucher.
-        </p>
-
-        <p>
-          Vielleicht seid ihr die Nächsten.
-        </p>
-
-        <p>
-          Vielleicht findet ihr einen Verein,
-          der zu euch passt.
-          Vielleicht entdeckt ihr ein Hobby,
-          bei dem ihr mitmachen möchtet.
-          Vielleicht habt ihr irgendwann selbst
-          eine Idee, die ihr mit anderen umsetzt.
-        </p>
-
-        <h2>
-          Denn ihr habt heute selbst erlebt:
-        </h2>
-
-        <p class="big">
-          Alleine kann man etwas beginnen.<br>
-          Gemeinsam kann man etwas bewegen.
-        </p>
-
-        <h1>
-          AUERBACH LEBT DURCH EUCH. ❤️
-        </h1>
-
-        <p class="big">
-          ${game.score} Punkte
-        </p>
-
-      </div>
-
-    </main>
-  `;
-
-}
-
-
-load();
-
-if (game.team) {
-  showStation();
-} else {
-  startPage();
-}
-
+start();
 </script>
-  </body>
+</body>
 </html>
