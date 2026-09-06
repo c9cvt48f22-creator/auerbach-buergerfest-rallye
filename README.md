@@ -11,7 +11,7 @@
     <!-- Container für alle Bildschirme (Screens) -->
     <div id="app" class="container">
         
-        <!-- SCREEN 1: STARTSEITE / TEAM-ERSTELLUNG -->
+              <!-- SCREEN 1: STARTSEITE / TEAM-ERSTELLUNG -->
         <section id="screen-start" class="screen active">
             <div class="card text-center">
                 <h1>Stadtrallye</h1>
@@ -21,13 +21,22 @@
                 <form id="team-form" onsubmit="handleTeamRegistration(event)">
                     <label for="team-name">Wie heißt euer Team?</label>
                     <input type="text" id="team-name" placeholder="z.B. Die Stadtfüchse" required autocomplete="off">
+                    
+                    <div class="spacer"></div>
+                    <label for="player-names">Vornamen der Mitspieler:</label>
+                    <input type="text" id="player-names" placeholder="z.B. Anna, Jonas, Lukas" required autocomplete="off">
+                    <p class="subtext">Bitte nur die Vornamen eintragen, damit wir wissen, wer im Team ist.</p>
+                    
+                    <div class="spacer"></div>
                     <button type="submit" class="btn primary">Los geht's</button>
                 </form>
                 <div class="admin-link-wrapper">
+                    <div class="spacer"></div>
                     <button onclick="switchScreen('screen-testmode')" class="btn secondary small">Zum Testmodus / Admin</button>
                 </div>
             </div>
         </section>
+
 
         <!-- SCREEN 2: SPIELOBERFLÄCHE -->
         <section id="screen-game" class="screen">
@@ -363,9 +372,10 @@ textarea {
 // SPIELSTAND & DATEN
 let gameState = {
     teamName: "",
+    playerNames: "",
     routeId: null,
     stationOrder: [],
-    currentIndex: 0, // 0 bedeutet: Sie müssen zur 1. Station ihrer Route
+    currentIndex: 0,
     points: 100,
     startTime: null,
     notes: "",
@@ -376,13 +386,13 @@ let gameState = {
 const stationsData = {
     1: { 
         name: "Rathaus", 
-        clue: "Geht vom Schlossplatz zum historischen Rathaus am Marktplatz.", 
+        clue: "Geht vom Schlossplatz zum historischen Rathaus am Marktplatz. Wichtige Berge im Wappen!", 
         title: "Stadtwappen-Puzzle & Die drei Berge", 
         desc: "Betrachte das Stadtwappen. Benenne als Pflichtaufgabe die drei Berge: Gottvaterberg, Grünberg und Pinzigberg." 
     },
     2: { name: "Bergleute", clue: "Folgt dem Hinweis vom Startpunkt zur Station der Bergleute.", title: "Bergleute", desc: "TODO: Konkrete Aufgabe einfügen." },
     3: { name: "Jahreszahlen", clue: "Haltet Ausschau nach historischen Jahreszahlen laut eurem Hinweis.", title: "Jahreszahlen", desc: "TODO: Konkrete Aufgabe einfügen." },
-    4: { name: "Goldener Löwe", clue: "Folgt dem Hinweis zum Goldenen Löwen.", title: "4x4-Logikaufgabe", desc: "TODO: Logikaufgabe einfügen." },
+    4: { name: "Goldener Löwe", clue: "Folgt dem Hinweis zum Goldenen Löwen.", title: "4x4-Logikaufgabe", desc: "TODO: Konkrete Aufgabe einfügen." },
     5: { name: "Heinrich Stromer", clue: "Such den Ort, der an Heinrich Stromer erinnert.", title: "Heinrich Stromer", desc: "TODO: Aufgabe einfügen." },
     6: { name: "Auerochse", clue: "Wo versteckt sich der Auerochse?", title: "Auerochse", desc: "TODO: Aufgabe einfügen." },
     7: { name: "Bücherei", clue: "Geht zur Bücherei für die zerrissene Nachricht.", title: "Zerrissene Nachricht", desc: "TODO: Aufgabe einfügen." },
@@ -410,9 +420,12 @@ function switchScreen(screenId) {
 function handleTeamRegistration(event) {
     event.preventDefault();
     const teamNameInput = document.getElementById('team-name').value.trim();
-    if (!teamNameInput) return;
+    const playerNamesInput = document.getElementById('player-names').value.trim();
+    
+    if (!teamNameInput || !playerNamesInput) return;
 
     gameState.teamName = teamNameInput;
+    gameState.playerNames = playerNamesInput;
     gameState.startTime = new Date();
 
     // Automatische Routenverteilung im Hintergrund (A, B oder C)
@@ -421,7 +434,7 @@ function handleTeamRegistration(event) {
     
     gameState.routeId = assignedRouteKey;
     gameState.stationOrder = routesConfig[assignedRouteKey];
-    gameState.currentIndex = 0; // Startet bei der ersten Station der zugewiesenen Route
+    gameState.currentIndex = 0;
 
     updateGameUI();
     initTestModeButtons();
@@ -433,13 +446,11 @@ function updateGameUI() {
     document.getElementById('display-team-name').innerText = `Team: ${gameState.teamName}`;
     document.getElementById('display-points').innerText = `Punkte: ${gameState.points}`;
     
-    // Fortschritt (Stationen 1 bis 9, exklusive Finale)
     const totalStations = gameState.stationOrder.length - 1;
     const progressPercent = (gameState.currentIndex / totalStations) * 100;
     document.getElementById('display-progress').innerText = `${gameState.currentIndex} / ${totalStations}`;
     document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
 
-    // Den genauen nächsten Ort / Hinweis für die anstehende Station anzeigen
     const currentStationId = gameState.stationOrder[gameState.currentIndex];
     const stationInfo = stationsData[currentStationId];
     
@@ -464,11 +475,9 @@ function simulateScan(stationId) {
     const expectedStationId = gameState.stationOrder[gameState.currentIndex];
 
     if (stationId === expectedStationId) {
-        // Richtiger QR-Code für die jetzige Station! Aufgabe öffnen
         loadTask(stationId);
         switchScreen('screen-task');
     } else {
-        // Falscher QR-Code
         alert("Falscher Ort! Überlegt noch einmal genau und schaut euch euren Hinweis an.");
         switchScreen('screen-game');
     }
@@ -485,10 +494,9 @@ function loadTask(stationId) {
 // Antwort absenden
 function submitAnswer() {
     alert("Richtig! Super gemacht.");
-    gameState.currentIndex++; // Geht in der Route einen Schritt weiter
+    gameState.currentIndex++;
 
     if (gameState.currentIndex >= gameState.stationOrder.length - 1) {
-        // Wenn 1-9 durch sind, wird Station 10 (Finale) freigeschaltet
         switchScreen('screen-finale');
     } else {
         updateGameUI();
@@ -527,7 +535,7 @@ function togglePause() {
     }
 }
 
-// Notizen öffnen & speichern
+// Notizen öffnen, speichern & schließen
 function openNotes() {
     document.getElementById('team-notes-input').value = gameState.notes;
     switchScreen('screen-notes');
@@ -535,6 +543,10 @@ function openNotes() {
 
 function saveNotes() {
     gameState.notes = document.getElementById('team-notes-input').value;
+    switchScreen('screen-game');
+}
+
+function closeNotes() {
     switchScreen('screen-game');
 }
 
