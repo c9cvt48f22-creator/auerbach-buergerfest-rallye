@@ -365,28 +365,33 @@ let gameState = {
     teamName: "",
     routeId: null,
     stationOrder: [],
-    currentIndex: 0, // Welcher Index in stationOrder ist als Nächstes dran
+    currentIndex: 0, // 0 bedeutet: Sie müssen zur 1. Station ihrer Route
     points: 100,
     startTime: null,
     notes: "",
     isPaused: false
 };
 
-// Lokale Stationen-Daten (Hier greift das datengetriebene Konzept)
+// Lokale Stationen-Daten (Pflichtaufgaben ohne falsche Bonus-Einträge)
 const stationsData = {
-    1: { name: "Rathaus", clue: "Geht zum historischen Rathaus am Marktplatz. Wichtige Berge im Wappen!", title: "Stadtwappen-Puzzle", desc: "Benenne die drei Berge im Wappen (Gottvaterberg, Grünberg, Pinzigberg)." },
-    2: { name: "Bergleute", clue: "Sucht den Ort der Bergleute.", title: "Bergleute", desc: "TODO: Aufgabe einfügen." },
-    3: { name: "Jahreszahlen", clue: "Haltet Ausschau nach historischen Jahreszahlen.", title: "Jahreszahlen", desc: "TODO: Aufgabe einfügen." },
-    4: { name: "Goldener Löwe", clue: "Folgt den Spuren des Goldenen Löwen.", title: "4x4-Logikaufgabe", desc: "TODO: Logikaufgabe einfügen." },
-    5: { name: "Heinrich Stromer", clue: "Wer war Heinrich Stromer? Findet es heraus.", title: "Heinrich Stromer", desc: "TODO: Aufgabe einfügen." },
+    1: { 
+        name: "Rathaus", 
+        clue: "Geht vom Schlossplatz zum historischen Rathaus am Marktplatz.", 
+        title: "Stadtwappen-Puzzle & Die drei Berge", 
+        desc: "Betrachte das Stadtwappen. Benenne als Pflichtaufgabe die drei Berge: Gottvaterberg, Grünberg und Pinzigberg." 
+    },
+    2: { name: "Bergleute", clue: "Folgt dem Hinweis vom Startpunkt zur Station der Bergleute.", title: "Bergleute", desc: "TODO: Konkrete Aufgabe einfügen." },
+    3: { name: "Jahreszahlen", clue: "Haltet Ausschau nach historischen Jahreszahlen laut eurem Hinweis.", title: "Jahreszahlen", desc: "TODO: Konkrete Aufgabe einfügen." },
+    4: { name: "Goldener Löwe", clue: "Folgt dem Hinweis zum Goldenen Löwen.", title: "4x4-Logikaufgabe", desc: "TODO: Logikaufgabe einfügen." },
+    5: { name: "Heinrich Stromer", clue: "Such den Ort, der an Heinrich Stromer erinnert.", title: "Heinrich Stromer", desc: "TODO: Aufgabe einfügen." },
     6: { name: "Auerochse", clue: "Wo versteckt sich der Auerochse?", title: "Auerochse", desc: "TODO: Aufgabe einfügen." },
     7: { name: "Bücherei", clue: "Geht zur Bücherei für die zerrissene Nachricht.", title: "Zerrissene Nachricht", desc: "TODO: Aufgabe einfügen." },
     8: { name: "Kirche", clue: "Besucht die Kirche und den Eisenerzaltar.", title: "Kirche + Eisenerzaltar", desc: "TODO: Aufgabe einfügen." },
-    9: { name: "Goldener Brunnen", clue: "Findet den Goldenen Brunnen und entschlüsselt das Morsezeichen.", title: "Goldener Brunnen + Morse", desc: "TODO: Morseaufgabe einfügen." },
-    10: { name: "Finale", clue: "Ihr habt alle Stationen geschafft! Ab zum Finale.", title: "Das große Finale", desc: "Willkommen im Ziel!" }
+    9: { name: "Goldener Brunnen", clue: "Findet den Goldenen Brunnen für die letzte Rätselstation.", title: "Goldener Brunnen + Morse", desc: "TODO: Morseaufgabe einfügen." },
+    10: { name: "Finale", clue: "Ihr habt alle Stationen geschafft! Kommt zum finalen Treffpunkt.", title: "Das große Finale", desc: "Willkommen im Ziel!" }
 };
 
-// Routen-Definitionen (1-9 gemischt, 10 immer am Ende)
+// Routen-Definitionen (Stationen 1-9 gemischt, Station 10 immer am Ende)
 const routesConfig = {
     A: [1, 3, 5, 2, 7, 4, 9, 6, 8, 10],
     B: [2, 4, 1, 6, 8, 3, 5, 7, 9, 10],
@@ -401,7 +406,7 @@ function switchScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// 1. Team-Registrierung & Automatische Routenverteilung (Round-Robin im Hintergrund)
+// 1. Team-Registrierung & Automatische Routenverteilung vom Schlossplatz aus
 function handleTeamRegistration(event) {
     event.preventDefault();
     const teamNameInput = document.getElementById('team-name').value.trim();
@@ -410,13 +415,13 @@ function handleTeamRegistration(event) {
     gameState.teamName = teamNameInput;
     gameState.startTime = new Date();
 
-    // Automatische Routenverteilung (z.B. basierend auf Namens-Länge oder einfachem Zähler)
+    // Automatische Routenverteilung im Hintergrund (A, B oder C)
     const routesKeys = ['A', 'B', 'C'];
     const assignedRouteKey = routesKeys[Math.floor(Math.random() * routesKeys.length)];
     
     gameState.routeId = assignedRouteKey;
     gameState.stationOrder = routesConfig[assignedRouteKey];
-    gameState.currentIndex = 0;
+    gameState.currentIndex = 0; // Startet bei der ersten Station der zugewiesenen Route
 
     updateGameUI();
     initTestModeButtons();
@@ -424,18 +429,25 @@ function handleTeamRegistration(event) {
 }
 
 // UI der Spieloberfläche aktualisieren
-updateGameUI = function() {
-    document.getElementById('display-team-name').innerText = `Team: ${gameState.teamName} (Route ${gameState.routeId})`;
+function updateGameUI() {
+    document.getElementById('display-team-name').innerText = `Team: ${gameState.teamName}`;
     document.getElementById('display-points').innerText = `Punkte: ${gameState.points}`;
     
-    const progressPercent = (gameState.currentIndex / (gameState.stationOrder.length - 1)) * 100;
-    document.getElementById('display-progress').innerText = `${gameState.currentIndex} / ${gameState.stationOrder.length - 1}`;
+    // Fortschritt (Stationen 1 bis 9, exklusive Finale)
+    const totalStations = gameState.stationOrder.length - 1;
+    const progressPercent = (gameState.currentIndex / totalStations) * 100;
+    document.getElementById('display-progress').innerText = `${gameState.currentIndex} / ${totalStations}`;
     document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
 
-    // Aktuellen Hinweis holen
+    // Den genauen nächsten Ort / Hinweis für die anstehende Station anzeigen
     const currentStationId = gameState.stationOrder[gameState.currentIndex];
     const stationInfo = stationsData[currentStationId];
-    document.getElementById('display-clue').innerText = stationInfo ? stationInfo.clue : "Rallye beendet!";
+    
+    if (gameState.currentIndex >= totalStations) {
+        document.getElementById('display-clue').innerText = "Ihr habt alle 9 Stationen geschafft! Geht jetzt weiter zum Finale (Station 10).";
+    } else {
+        document.getElementById('display-clue').innerText = stationInfo ? stationInfo.clue : "Folgt eurem Hinweis.";
+    }
 }
 
 // QR-Scanner öffnen
@@ -445,15 +457,14 @@ function openScanner() {
         return;
     }
     switchScreen('screen-scanner');
-    // Hier wird später der echte html5-qrcode Scanner eingebunden
 }
 
-// Simulieren des Scannens einer Station (für Testmodus oder direkten Test)
+// Simulieren des Scannens einer Station (für Testmodus)
 function simulateScan(stationId) {
     const expectedStationId = gameState.stationOrder[gameState.currentIndex];
 
     if (stationId === expectedStationId) {
-        // Richtiger QR-Code! Aufgabe öffnen
+        // Richtiger QR-Code für die jetzige Station! Aufgabe öffnen
         loadTask(stationId);
         switchScreen('screen-task');
     } else {
@@ -473,12 +484,11 @@ function loadTask(stationId) {
 
 // Antwort absenden
 function submitAnswer() {
-    // Richtige Antwort Simulation -> Nächste Station freischalten
     alert("Richtig! Super gemacht.");
-    gameState.currentIndex++;
+    gameState.currentIndex++; // Geht in der Route einen Schritt weiter
 
     if (gameState.currentIndex >= gameState.stationOrder.length - 1) {
-        // Letzte Station (Finale) erreicht
+        // Wenn 1-9 durch sind, wird Station 10 (Finale) freigeschaltet
         switchScreen('screen-finale');
     } else {
         updateGameUI();
@@ -488,14 +498,14 @@ function submitAnswer() {
 
 // Hinweis anfordern
 function requestHint() {
-    gameState.points -= 3; // Konfigurierbarer Abzug
+    gameState.points -= 3;
     updateGameUI();
-    alert("Hinweis: Schaut euch die Umgebung genau an!");
+    alert("Hinweis angefordert: Schaut euch am aktuellen Ort noch einmal ganz genau um!");
 }
 
 // Aufgabe überspringen
 function skipTask() {
-    if (confirm("Möchtet ihr diese Aufgabe wirklich überspringen? Das gibt Punktabzug.")) {
+    if (confirm("Möchtet ihr diese Aufgabe wirklich überspringen? Das gibt Punktabzug, aber ihr bleibt auf eurer Route.")) {
         gameState.points -= 5;
         gameState.currentIndex++;
         if (gameState.currentIndex >= gameState.stationOrder.length - 1) {
@@ -532,7 +542,7 @@ function saveNotes() {
 function submitSurvey(event) {
     event.preventDefault();
     alert("Vielen Dank für eure Teilnahme am Bürgerfest 2027!");
-    location.reload(); // Reset zum Start
+    location.reload();
 }
 
 // Testmodus-Buttons dynamisch generieren
@@ -543,7 +553,7 @@ function initTestModeButtons() {
     for (let i = 1; i <= 10; i++) {
         const btn = document.createElement('button');
         btn.className = "btn secondary small";
-        btn.innerText = `Scan Station ${i}`;
+        btn.innerText = `Scan Station ${i} QR-Code`;
         btn.onclick = () => simulateScan(i);
         container.appendChild(btn);
     }
