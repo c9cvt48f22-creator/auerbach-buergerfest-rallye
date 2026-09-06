@@ -570,3 +570,7 @@ function initTestModeButtons() {
         container.appendChild(btn);
     }
 }
+    <!-- Verknüpfung der Logik -->
+    <script src="app.js"></script>
+</body>
+</html>
